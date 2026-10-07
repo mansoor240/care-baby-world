@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../../api/client";
 import { formatPrice, formatDate } from "../../lib/format";
+import { whatsappLink } from "../../lib/whatsapp";
+import { MessageCircle } from "lucide-react";
 
 const STATUSES = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
 
@@ -102,6 +104,16 @@ export default function AdminOrders() {
               <div className="flex justify-between"><span>Delivery</span><span>{selected.deliveryFee === 0 ? "Free" : formatPrice(selected.deliveryFee)}</span></div>
               <div className="flex justify-between font-semibold"><span>Total</span><span>{formatPrice(selected.total)}</span></div>
             </div>
+             <a
+              href={whatsappLink(
+                `Hi ${selected.customer.fullName}! Your order ${selected.orderNumber} is now ${selected.status}. Thank you for shopping with Care Baby World!`
+              )}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-sage-500 py-2.5 text-sm font-medium text-white hover:bg-sage-400"
+            >
+              <MessageCircle size={16} /> Notify Customer on WhatsApp
+            </a>
           </div>
         </div>
       )}

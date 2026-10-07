@@ -74,6 +74,27 @@ router.post("/", async (req, res) => {
   }
 });
 
+// GET /api/orders/track?orderNumber=TN-XXX&mobile=9876543210
+// Public route — customer must provide BOTH order number and mobile to view
+router.get("/track", async (req, res) => {
+  const { orderNumber, mobile } = req.query;
+
+  if (!orderNumber || !mobile) {
+    return res.status(400).json({ error: "Order number and mobile required" });
+  }
+
+  const order = await Order.findOne({
+    orderNumber: orderNumber.trim(),
+    "customer.mobile": mobile.trim(),
+  });
+
+  if (!order) {
+    return res.status(404).json({ error: "No order found with these details" });
+  }
+
+  res.json(order);
+});
+
 // GET /api/orders/:orderNumber (public — for confirmation page)
 router.get("/:orderNumber", async (req, res) => {
   const order = await Order.findOne({ orderNumber: req.params.orderNumber });

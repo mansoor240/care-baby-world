@@ -19,6 +19,7 @@ import Search from "./pages/Search";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import TrackOrder from "./pages/TrackOrder";
 import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import Policies from "./pages/Policies";
@@ -77,6 +78,7 @@ export default function App() {
             <Route path="/cart" element={<StoreLayout><Cart /></StoreLayout>} />
             <Route path="/checkout" element={<StoreLayout><Checkout /></StoreLayout>} />
             <Route path="/order/:orderNumber" element={<StoreLayout><OrderConfirmation /></StoreLayout>} />
+            <Route path="/track" element={<StoreLayout><TrackOrder /></StoreLayout>} />
             <Route path="/wishlist" element={<StoreLayout><Wishlist /></StoreLayout>} />
             <Route path="/account" element={<StoreLayout><Account /></StoreLayout>} />
             <Route path="/policies/:slug" element={<StoreLayout><Policies /></StoreLayout>} />

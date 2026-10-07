@@ -38,10 +38,13 @@ export default function OrderConfirmation() {
         <p className="mt-1 text-sm text-ink-700">
           Your order has been placed successfully.
         </p>
-        <p className="mt-3 rounded-full bg-white px-4 py-1.5 text-sm font-semibold">
+                <p className="mt-3 rounded-full bg-white px-4 py-1.5 text-sm font-semibold">
           Order # {order.orderNumber}
         </p>
-      </div>
+        <p className="mt-4 text-xs text-ink-700">
+          📌 Save your order number. Track anytime at{" "}
+          <a href="/track" className="font-medium text-blush-500 underline">/track</a>
+        </p>
 
       <section className="mt-8 rounded-3xl bg-white p-6 shadow-card">
         <h2 className="font-display text-lg">Order Details</h2>
@@ -92,7 +95,13 @@ export default function OrderConfirmation() {
         </p>
       </section>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <Link
+          to="/track"
+          className="flex flex-1 items-center justify-center rounded-full bg-ink-900 py-3 text-sm font-medium text-white hover:bg-ink-700"
+        >
+          Track This Order
+        </Link>
         <a
           href={whatsappLink(whatsappMessages.order(order.orderNumber))}
           target="_blank"
