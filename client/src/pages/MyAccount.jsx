@@ -20,28 +20,22 @@ export default function MyAccount() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Redirect to login if not logged in
+  // Only redirect if we're SURE user is logged out (not just loading)
   useEffect(() => {
-    if (!ready) return;
-    if (!isLoggedIn) {
+    if (ready && !isLoggedIn) {
       navigate("/login", { replace: true });
     }
   }, [ready, isLoggedIn, navigate]);
 
-  // Fetch orders when logged in
+  // Fetch orders
   useEffect(() => {
     if (!ready || !isLoggedIn) return;
-    setLoading(true);
     api
       .get("/customers/me/orders")
       .then((r) => setOrders(r.data))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
   }, [ready, isLoggedIn]);
-
-  const handleLogout = () => {
-    logout();
-  };
 
   if (!ready || !isLoggedIn) return null;
 
@@ -57,7 +51,10 @@ export default function MyAccount() {
             </p>
           </div>
                               <button
-  onClick={handleLogout}
+  onClick={() => {
+    logout();
+    navigate("/login", { replace: true });
+  }}
   className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm hover:bg-cream"
 >
   <LogOut size={14} /> Logout
