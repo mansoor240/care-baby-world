@@ -115,12 +115,65 @@ router.get("/me/orders", requireCustomer, async (req, res) => {
   const customer = await Customer.findById(req.customerId);
   if (!customer) return res.status(404).json({ error: "Customer not found" });
 
-  // Find orders by this customer's mobile (matches guest orders too)
-  const orders = await Order.find({ "customer.mobile": customer.mobile })
+  // Match by customerId OR by mobile (so guest orders with same mobile also show)
+  const orders = await Order.find({
+    $or: [
+      { customerId: customer._id },
+      { "customer.mobile": customer.mobile },
+    ],
+  })
     .sort({ createdAt: -1 })
     .limit(50);
 
   res.json(orders);
+});
+
+// GET /api/customers/me/addresses
+router.get("/me/addresses", requireCustomer, async (req, res) => {
+  const customer = await Customer.findById(req.customerId).select("addresses");
+  if (!customer) return res.status(404).json({ error: "Customer not found" });
+  res.json(customer.addresses || []);
+});
+
+// POST /api/customers/me/addresses — add new address
+router.post("/me/addresses", requireCustomer, async (req, res) => {
+  const customer = await Customer.findById(req.customerId);
+  if (!customer) return res.status(404).json({ error: "Customer not found" });
+
+  if (customer.addresses.length >= 5) {
+    return res.status(400).json({ error: "Maximum 5 addresses allowed" });
+  }
+
+  const { label, fullName, mobile, house, street, city, state, pincode } = req.body;
+
+  customer.addresses.push({
+    label: label || "Home",
+    fullName,
+    mobile,
+    house,
+    street,
+    city,
+    state,
+    pincode,
+  });
+
+  await customer.save();
+  res.status(201).json(customer.addresses);
+});
+
+// DELETE /api/customers/me/addresses/:index
+router.delete("/me/addresses/:index", requireCustomer, async (req, res) => {
+  const customer = await Customer.findById(req.customerId);
+  if (!customer) return res.status(404).json({ error: "Customer not found" });
+
+  const idx = Number(req.params.index);
+  if (idx < 0 || idx >= customer.addresses.length) {
+    return res.status(400).json({ error: "Invalid address index" });
+  }
+
+  customer.addresses.splice(idx, 1);
+  await customer.save();
+  res.json(customer.addresses);
 });
 
 export default router;
