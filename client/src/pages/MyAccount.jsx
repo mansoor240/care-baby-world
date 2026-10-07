@@ -18,16 +18,17 @@ export default function MyAccount() {
   const { customer, isLoggedIn, ready, logout } = useCustomer();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loggingOut, setLoggingOut] = useState(false);
   const navigate = useNavigate();
 
+  // Redirect to login if not logged in
   useEffect(() => {
     if (!ready) return;
-    if (!isLoggedIn && !loggingOut) {
+    if (!isLoggedIn) {
       navigate("/login", { replace: true });
     }
-  }, [ready, isLoggedIn, loggingOut, navigate]);
+  }, [ready, isLoggedIn, navigate]);
 
+  // Fetch orders when logged in
   useEffect(() => {
     if (!ready || !isLoggedIn) return;
     setLoading(true);
@@ -39,9 +40,7 @@ export default function MyAccount() {
   }, [ready, isLoggedIn]);
 
   const handleLogout = () => {
-    setLoggingOut(true);
     logout();
-    navigate("/", { replace: true });
   };
 
   if (!ready || !isLoggedIn) return null;
@@ -58,11 +57,11 @@ export default function MyAccount() {
             </p>
           </div>
                               <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm hover:bg-cream"
-          >
-            <LogOut size={14} /> Logout
-          </button>
+  onClick={handleLogout}
+  className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm hover:bg-cream"
+>
+  <LogOut size={14} /> Logout
+</button>
         </div>
       </div>
 

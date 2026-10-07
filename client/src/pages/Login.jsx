@@ -1,25 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useCustomer } from "../context/CustomerContext";
 
 export default function Login() {
-  const { login } = useCustomer();
+  const { login, isLoggedIn, ready } = useCustomer();
   const navigate = useNavigate();
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-    const submit = async (e) => {
+  // If already logged in, go to account
+  useEffect(() => {
+    if (ready && isLoggedIn) {
+      navigate("/account", { replace: true });
+    }
+  }, [ready, isLoggedIn, navigate]);
+
+  const submit = async (e) => {
     e.preventDefault();
     if (!/^[6-9]\d{9}$/.test(mobile)) return toast.error("Enter a valid 10-digit mobile");
+    if (!password) return toast.error("Enter your password");
 
     setLoading(true);
     try {
       await login({ mobile, password });
       toast.success("Welcome back!");
-      // Small delay to ensure state has updated before navigating
-      setTimeout(() => navigate("/account", { replace: true }), 100);
+      // The useEffect above will handle the redirect once isLoggedIn becomes true
     } catch (err) {
       toast.error(err.response?.data?.error || "Could not log in");
     } finally {

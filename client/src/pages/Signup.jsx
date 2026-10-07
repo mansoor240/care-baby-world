@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useCustomer } from "../context/CustomerContext";
 
 export default function Signup() {
-  const { signup } = useCustomer();
+  const { signup, isLoggedIn, ready } = useCustomer();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", mobile: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
+
+  // If already logged in, go to account
+  useEffect(() => {
+    if (ready && isLoggedIn) {
+      navigate("/account", { replace: true });
+    }
+  }, [ready, isLoggedIn, navigate]);
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
@@ -21,7 +28,7 @@ export default function Signup() {
     try {
       await signup(form);
       toast.success("Account created!");
-      navigate("/account");
+      // useEffect handles redirect
     } catch (err) {
       toast.error(err.response?.data?.error || "Could not create account");
     } finally {
@@ -47,7 +54,13 @@ export default function Signup() {
             placeholder="10-digit mobile"
             autoComplete="tel-national"
           />
-          <Field label="Email (optional)" type="email" value={form.email} onChange={set("email")} autoComplete="email" />
+          <Field
+            label="Email (optional)"
+            type="email"
+            value={form.email}
+            onChange={set("email")}
+            autoComplete="email"
+          />
           <Field
             label="Password"
             type="password"
