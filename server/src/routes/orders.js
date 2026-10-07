@@ -2,7 +2,9 @@ import { Router } from "express";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Coupon from "../models/Coupon.js";
+import Customer from "../models/Customer.js";
 import { calculateTotals } from "../utils/totals.js";
+import { optionalCustomer } from "../middleware/customerAuth.js";
 
 const router = Router();
 
@@ -13,7 +15,7 @@ function genOrderNumber() {
 }
 
 // POST /api/orders
-router.post("/", async (req, res) => {
+router.post("/", optionalCustomer, async (req, res) => {
   try {
     const { customer, items, paymentMethod, couponCode } = req.body;
 
@@ -47,6 +49,7 @@ router.post("/", async (req, res) => {
     const order = await Order.create({
       orderNumber: genOrderNumber(),
       customer,
+      customerId: req.customerId || null,
       items: validated,
       subtotal,
       deliveryFee,
@@ -54,9 +57,32 @@ router.post("/", async (req, res) => {
       total,
       couponCode: coupon?.code || "",
       paymentMethod,
-      paymentStatus: paymentMethod === "cod" ? "pending" : "pending",
+      paymentStatus: "pending",
       status: "pending",
     });
+
+    // Auto-save address to customer's account if logged in
+    if (req.customerId) {
+      const cust = await Customer.findById(req.customerId);
+      if (cust && cust.addresses.length < 5) {
+        const already = cust.addresses.find(
+          (a) => a.house === customer.house && a.pincode === customer.pincode
+        );
+        if (!already) {
+          cust.addresses.push({
+            label: "Home",
+            fullName: customer.fullName,
+            mobile: customer.mobile,
+            house: customer.house,
+            street: customer.street,
+            city: customer.city,
+            state: customer.state,
+            pincode: customer.pincode,
+          });
+          await cust.save();
+        }
+      }
+    }
 
     // Decrement stock
     await Promise.all(
@@ -74,8 +100,10 @@ router.post("/", async (req, res) => {
   }
 });
 
+// ⚠️ IMPORTANT: Specific routes (/track, /by-id/:id) MUST come before /:orderNumber
+// Otherwise Express treats "track" or "by-id" as an order number.
+
 // GET /api/orders/track?orderNumber=TN-XXX&mobile=9876543210
-// Public route — customer must provide BOTH order number and mobile to view
 router.get("/track", async (req, res) => {
   const { orderNumber, mobile } = req.query;
 
@@ -95,7 +123,19 @@ router.get("/track", async (req, res) => {
   res.json(order);
 });
 
+// GET /api/orders/by-id/:id — fetch single order by Mongo ID
+router.get("/by-id/:id", async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    res.json(order);
+  } catch {
+    res.status(400).json({ error: "Invalid order id" });
+  }
+});
+
 // GET /api/orders/:orderNumber (public — for confirmation page)
+// ⚠️ This is the LAST route — it matches anything, so specific routes go above.
 router.get("/:orderNumber", async (req, res) => {
   const order = await Order.findOne({ orderNumber: req.params.orderNumber });
   if (!order) return res.status(404).json({ error: "Order not found" });

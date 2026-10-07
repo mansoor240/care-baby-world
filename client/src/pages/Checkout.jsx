@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../api/client";
 import { useCart } from "../context/CartContext";
+import { useCustomer } from "../context/CustomerContext";
 import { formatPrice } from "../lib/format";
 import { storeConfig } from "../config/store";
 
@@ -19,12 +20,25 @@ const initialAddr = {
 
 export default function Checkout() {
   const cart = useCart();
+  const { customer: loggedInCustomer, isLoggedIn } = useCustomer();
   const navigate = useNavigate();
   const [customer, setCustomer] = useState(initialAddr);
   const [payment, setPayment] = useState("cod");
   const [couponCode, setCouponCode] = useState(cart.coupon?.code || "");
   const [applying, setApplying] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Auto-fill from logged-in customer
+  useEffect(() => {
+    if (isLoggedIn && loggedInCustomer) {
+      setCustomer((prev) => ({
+        ...prev,
+        fullName: prev.fullName || loggedInCustomer.name || "",
+        mobile: prev.mobile || loggedInCustomer.mobile || "",
+        email: prev.email || loggedInCustomer.email || "",
+      }));
+    }
+  }, [isLoggedIn, loggedInCustomer]);
 
   const subtotal = cart.items.reduce((s, i) => s + i.price * i.quantity, 0);
   const discount = cart.coupon?.discount || 0;
@@ -85,7 +99,11 @@ export default function Checkout() {
         paymentMethod: payment,
         couponCode: cart.coupon?.code || "",
       };
-      const { data } = await api.post("/orders", payload);
+            const headers = {};
+      const token = localStorage.getItem("tn_customer_token");
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const { data } = await api.post("/orders", payload, { headers });
       cart.clear();
       toast.success("Order placed!");
       navigate(`/order/${data.orderNumber}`);

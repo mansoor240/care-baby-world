@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { useCustomer } from "../../context/CustomerContext";
 
 const NAV = [
   { to: "/shop", label: "Shop" },
@@ -18,6 +19,7 @@ export default function Header() {
   const navigate = useNavigate();
   const cart = useCart();
   const wishlist = useWishlist();
+  const { customer, isLoggedIn } = useCustomer();
 
   const submit = (e) => {
     e.preventDefault();
@@ -88,7 +90,26 @@ export default function Header() {
               </span>
             )}
           </Link>
-          <Link to="/account" className="p-2" aria-label="Account">
+                    {isLoggedIn ? (
+            <Link
+              to="/account"
+              className="hidden md:flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-3 py-1.5 text-sm hover:bg-cream"
+            >
+              <User size={16} />
+              <span className="max-w-[80px] truncate">
+                Hi, {customer?.name?.split(" ")[0]}
+              </span>
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden md:flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-3 py-1.5 text-sm hover:bg-cream"
+            >
+              <User size={16} />
+              Login
+            </Link>
+          )}
+          <Link to={isLoggedIn ? "/account" : "/login"} className="md:hidden p-2" aria-label="Account">
             <User size={20} />
           </Link>
         </div>

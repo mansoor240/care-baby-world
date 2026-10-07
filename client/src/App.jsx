@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CustomerProvider } from "./context/CustomerContext";
 
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -19,13 +20,16 @@ import Search from "./pages/Search";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
-import TrackOrder from "./pages/TrackOrder";
 import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import Policies from "./pages/Policies";
 import NotFound from "./pages/NotFound";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import MyAccount from "./pages/MyAccount";
+import OrderDetail from "./pages/OrderDetail";
+import TrackOrder from "./pages/TrackOrder";
 
-// ⚠️ Admin files live in components/admin/ (matching your tree)
 import AdminLogin from "./components/admin/AdminLogin";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminProducts from "./components/admin/AdminProducts";
@@ -65,45 +69,51 @@ function StoreLayout({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <ScrollToTop />
-          <Routes>
-            {/* Store */}
-            <Route path="/" element={<StoreLayout><Home /></StoreLayout>} />
-            <Route path="/shop" element={<StoreLayout><Shop /></StoreLayout>} />
-            <Route path="/category/:slug" element={<StoreLayout><Category /></StoreLayout>} />
-            <Route path="/product/:slug" element={<StoreLayout><ProductDetail /></StoreLayout>} />
-            <Route path="/search" element={<StoreLayout><Search /></StoreLayout>} />
-            <Route path="/cart" element={<StoreLayout><Cart /></StoreLayout>} />
-            <Route path="/checkout" element={<StoreLayout><Checkout /></StoreLayout>} />
-            <Route path="/order/:orderNumber" element={<StoreLayout><OrderConfirmation /></StoreLayout>} />
-            <Route path="/track" element={<StoreLayout><TrackOrder /></StoreLayout>} />
-            <Route path="/wishlist" element={<StoreLayout><Wishlist /></StoreLayout>} />
-            <Route path="/account" element={<StoreLayout><Account /></StoreLayout>} />
-            <Route path="/policies/:slug" element={<StoreLayout><Policies /></StoreLayout>} />
+      <CustomerProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <ScrollToTop />
+            <Routes>
+              {/* Store */}
+              <Route path="/" element={<StoreLayout><Home /></StoreLayout>} />
+              <Route path="/shop" element={<StoreLayout><Shop /></StoreLayout>} />
+              <Route path="/category/:slug" element={<StoreLayout><Category /></StoreLayout>} />
+              <Route path="/product/:slug" element={<StoreLayout><ProductDetail /></StoreLayout>} />
+              <Route path="/search" element={<StoreLayout><Search /></StoreLayout>} />
+              <Route path="/cart" element={<StoreLayout><Cart /></StoreLayout>} />
+              <Route path="/checkout" element={<StoreLayout><Checkout /></StoreLayout>} />
+              <Route path="/order/:orderNumber" element={<StoreLayout><OrderConfirmation /></StoreLayout>} />
+              <Route path="/wishlist" element={<StoreLayout><Wishlist /></StoreLayout>} />
+              <Route path="/account" element={<StoreLayout><MyAccount /></StoreLayout>} />
+              <Route path="/account/orders/:id" element={<StoreLayout><OrderDetail /></StoreLayout>} />
+              <Route path="/policies/:slug" element={<StoreLayout><Policies /></StoreLayout>} />
+              <Route path="/track" element={<StoreLayout><TrackOrder /></StoreLayout>} />
+              <Route path="/signup" element={<StoreLayout><Signup /></StoreLayout>} />
+              <Route path="/login" element={<StoreLayout><Login /></StoreLayout>} />
 
-            {/* Admin */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route
-              path="/admin"
-              element={
-                <RequireAdmin>
-                  <AdminLayout />
-                </RequireAdmin>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="orders" element={<AdminOrders />} />
-              <Route path="categories" element={<AdminCategories />} />
-              <Route path="coupons" element={<AdminCoupons />} />
-            </Route>
+              {/* Admin */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route
+                path="/admin"
+                element={
+                  <RequireAdmin>
+                    <AdminLayout />
+                  </RequireAdmin>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="coupons" element={<AdminCoupons />} />
+              </Route>
 
-            <Route path="*" element={<StoreLayout><NotFound /></StoreLayout>} />
-          </Routes>
-        </WishlistProvider>
-      </CartProvider>
+              <Route path="*" element={<StoreLayout><NotFound /></StoreLayout>} />
+            </Routes>
+          </WishlistProvider>
+        </CartProvider>
+      </CustomerProvider>
     </AuthProvider>
   );
 }
+  
