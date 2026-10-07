@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useReveal } from "./hooks/useReveal";
 
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
@@ -67,6 +68,7 @@ function StoreLayout({ children }) {
 }
 
 export default function App() {
+  useReveal();
   return (
     <AuthProvider>
       <CustomerProvider>
