@@ -62,26 +62,36 @@ export default function MyAccount() {
         </div>
       </div>
 
-      {/* Quick Links */}
+            {/* Quick Links */}
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
-        <Link to="/account" className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-card">
+        <a
+          href="#orders"
+          className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-card hover:shadow-soft transition"
+        >
           <div className="grid h-10 w-10 place-items-center rounded-full bg-blush-50 text-blush-500">
             <Package size={18} />
           </div>
           <div>
             <div className="text-sm font-semibold">My Orders</div>
-            <div className="text-xs text-ink-500">View order history</div>
+            <div className="text-xs text-ink-500">
+              {orders.length > 0 ? `${orders.length} order(s)` : "No orders yet"}
+            </div>
           </div>
-        </Link>
-        <Link to="/checkout" className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-card">
+        </a>
+
+        <Link
+          to="/track"
+          className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-card hover:shadow-soft transition"
+        >
           <div className="grid h-10 w-10 place-items-center rounded-full bg-blush-50 text-blush-500">
             <MapPin size={18} />
           </div>
           <div>
-            <div className="text-sm font-semibold">Addresses</div>
-            <div className="text-xs text-ink-500">Saved at checkout</div>
+            <div className="text-sm font-semibold">Track an Order</div>
+            <div className="text-xs text-ink-500">Enter order number</div>
           </div>
         </Link>
+
         <div className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-card">
           <div className="grid h-10 w-10 place-items-center rounded-full bg-blush-50 text-blush-500">
             <User size={18} />
@@ -93,8 +103,9 @@ export default function MyAccount() {
         </div>
       </div>
 
-      {/* Orders */}
-      <div className="mt-8">
+      
+            {/* Orders */}
+      <div className="mt-8" id="orders">
         <h2 className="mb-4 font-display text-2xl">My Orders</h2>
 
         {loading && (
@@ -146,20 +157,23 @@ export default function MyAccount() {
                     <div className="text-xs text-ink-500 capitalize">{o.paymentMethod}</div>
                   </div>
                 </div>
-                <div className="mt-3 flex gap-2 overflow-hidden">
-                  {o.items.slice(0, 4).map((i) => (
-                    <img
-                      key={i.productId + i.variant}
-                      src={i.image}
-                      alt=""
-                      className="h-12 w-12 rounded-xl object-cover"
-                    />
-                  ))}
-                  {o.items.length > 4 && (
-                    <div className="grid h-12 w-12 place-items-center rounded-xl bg-cream text-xs text-ink-500">
-                      +{o.items.length - 4}
-                    </div>
-                  )}
+                                <div className="mt-3 flex items-center justify-between gap-2">
+                  <div className="flex gap-2 overflow-hidden">
+                    {o.items.slice(0, 4).map((i) => (
+                      <img
+                        key={i.productId + i.variant}
+                        src={i.image}
+                        alt=""
+                        className="h-12 w-12 rounded-xl object-cover"
+                      />
+                    ))}
+                    {o.items.length > 4 && (
+                      <div className="grid h-12 w-12 place-items-center rounded-xl bg-cream text-xs text-ink-500">
+                        +{o.items.length - 4}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-xs text-blush-500">View →</span>
                 </div>
               </Link>
             ))}
