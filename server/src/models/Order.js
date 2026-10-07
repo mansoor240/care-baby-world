@@ -31,6 +31,7 @@ const orderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, required: true, unique: true, index: true },
     customer: { type: addressSchema, required: true },
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", default: null, index: true },
     items: { type: [orderItemSchema], required: true },
     subtotal: { type: Number, required: true },
     deliveryFee: { type: Number, required: true },
