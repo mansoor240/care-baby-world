@@ -176,9 +176,18 @@ export default function Home() {
         </h2>
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            { name: "Priya S.", text: "Super soft rompers and quick delivery. My go-to store now!" },
-            { name: "Arjun M.", text: "The gift set was beautifully packed. Excellent quality." },
-            { name: "Neha K.", text: "Loved the WhatsApp support — very helpful team." },
+            {
+              name: "Sikander",
+              text: "Very good products & you can get products at affordable price.",
+            },
+            {
+              name: "Syed Mushtaq Ahmed",
+              text: "Best baby store in the locality, with good quality diapers at wholesale prices. They have all the baby accessories at affordable prices.",
+            },
+            {
+              name: "Ayyub Ahmed",
+              text: "Best store for baby products, has a variety of diapers at wholesale prices.",
+            },
           ].map((r, i) => (
             <blockquote
               key={r.name}
