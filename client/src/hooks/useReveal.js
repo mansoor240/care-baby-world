@@ -3,32 +3,59 @@ import { useEffect } from "react";
 /**
  * Adds `.visible` class to elements with reveal classes
  * when they enter the viewport.
+ *
+ * Runs on mount, and re-runs whenever the DOM changes
+ * (so dynamic content like loaded categories also animates).
  */
 export function useReveal() {
   useEffect(() => {
-    const els = document.querySelectorAll(
-      ".reveal, .reveal-left, .reveal-right, .reveal-scale"
-    );
+    let observer;
 
-    // If IntersectionObserver isn't supported (very old browsers), show immediately
-    if (typeof IntersectionObserver === "undefined") {
-      els.forEach((el) => el.classList.add("visible"));
-      return;
-    }
+    const setup = () => {
+      // Clean up previous observer
+      if (observer) observer.disconnect();
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -50px 0px" }
-    );
+      const els = document.querySelectorAll(
+        ".reveal:not(.visible), .reveal-left:not(.visible), .reveal-right:not(.visible), .reveal-scale:not(.visible)"
+      );
 
-    els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  });
+      if (typeof IntersectionObserver === "undefined") {
+        els.forEach((el) => el.classList.add("visible"));
+        return;
+      }
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+      );
+
+      els.forEach((el) => observer.observe(el));
+    };
+
+    // Initial scan
+    setup();
+
+    // Re-scan when DOM changes (dynamic content)
+    const mutationObserver = new MutationObserver(() => {
+      // Debounce: only run once per frame
+      requestAnimationFrame(setup);
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      if (observer) observer.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, []);
 }
