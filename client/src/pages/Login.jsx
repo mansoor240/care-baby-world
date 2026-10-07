@@ -10,7 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const submit = async (e) => {
+    const submit = async (e) => {
     e.preventDefault();
     if (!/^[6-9]\d{9}$/.test(mobile)) return toast.error("Enter a valid 10-digit mobile");
 
@@ -18,7 +18,8 @@ export default function Login() {
     try {
       await login({ mobile, password });
       toast.success("Welcome back!");
-      navigate("/account");
+      // Small delay to ensure state has updated before navigating
+      setTimeout(() => navigate("/account", { replace: true }), 100);
     } catch (err) {
       toast.error(err.response?.data?.error || "Could not log in");
     } finally {

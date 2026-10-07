@@ -18,19 +18,31 @@ export default function MyAccount() {
   const { customer, isLoggedIn, ready, logout } = useCustomer();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!ready) return;
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
+    if (!isLoggedIn && !loggingOut) {
+      navigate("/login", { replace: true });
     }
+  }, [ready, isLoggedIn, loggingOut, navigate]);
+
+  useEffect(() => {
+    if (!ready || !isLoggedIn) return;
+    setLoading(true);
     api
       .get("/customers/me/orders")
       .then((r) => setOrders(r.data))
+      .catch(() => setOrders([]))
       .finally(() => setLoading(false));
-  }, [ready, isLoggedIn, navigate]);
+  }, [ready, isLoggedIn]);
+
+  const handleLogout = () => {
+    setLoggingOut(true);
+    logout();
+    navigate("/", { replace: true });
+  };
 
   if (!ready || !isLoggedIn) return null;
 
@@ -45,11 +57,8 @@ export default function MyAccount() {
               {customer?.mobile} {customer?.email && `· ${customer.email}`}
             </p>
           </div>
-          <button
-            onClick={() => {
-              logout();
-              navigate("/");
-            }}
+                              <button
+            onClick={handleLogout}
             className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm hover:bg-cream"
           >
             <LogOut size={14} /> Logout
