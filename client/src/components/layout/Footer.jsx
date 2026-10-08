@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { storeConfig } from "../../config/store";
-import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Users } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -47,7 +47,7 @@ export default function Footer() {
                 aria-label="Instagram"
                 className="grid h-9 w-9 place-items-center rounded-full bg-cream text-ink-700 transition hover:bg-blush-50 hover:text-blush-500"
               >
-                <Instagram size={16} />
+                <Send size={16} />
               </a>
             )}
             {storeConfig.social?.facebook && (
@@ -58,7 +58,7 @@ export default function Footer() {
                 aria-label="Facebook"
                 className="grid h-9 w-9 place-items-center rounded-full bg-cream text-ink-700 transition hover:bg-sky-50 hover:text-sky-500"
               >
-                <Facebook size={16} />
+                <Users size={16} />
               </a>
             )}
           </div>
