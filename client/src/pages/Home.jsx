@@ -44,13 +44,13 @@ export default function Home() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 to="/shop"
-                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
+                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-ink-700 hover:shadow-soft hover:-translate-y-0.5 active:scale-95"
               >
                 Shop Now
               </Link>
               <Link
                 to="/shop"
-                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-transform active:scale-95"
+                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 transition-all duration-300 hover:bg-cream hover:shadow-card hover:-translate-y-0.5 active:scale-95"
               >
                 Explore Categories
               </Link>
@@ -72,19 +72,26 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 py-12">
         <div className="mb-6 flex items-end justify-between reveal">
           <h2 className="font-display text-2xl text-ink-900">Shop by Category</h2>
-          <Link to="/shop" className="text-sm text-blush-500 hover:underline">View all →</Link>
+          <Link
+            to="/shop"
+            className="text-sm text-blush-500 transition-all duration-200 hover:text-blush-600 hover:translate-x-0.5"
+          >
+            View all →
+          </Link>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {categories.map((c, i) => (
             <Link
               key={c.slug}
               to={`/category/${c.slug}`}
-              className={`group rounded-3xl bg-white p-4 text-center shadow-card transition hover:-translate-y-1 hover:shadow-soft reveal stagger-${Math.min(i + 1, 6)}`}
+              className={`group rounded-3xl bg-white p-4 text-center shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft reveal stagger-${Math.min(i + 1, 6)}`}
             >
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blush-50 text-2xl transition-transform group-hover:scale-110">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blush-50 text-2xl transition-transform duration-300 group-hover:scale-110">
                 {c.emoji || "🧸"}
               </div>
-              <div className="mt-3 text-sm font-medium text-ink-900">{c.name}</div>
+              <div className="mt-3 text-sm font-medium text-ink-900 transition-colors group-hover:text-blush-500">
+                {c.name}
+              </div>
             </Link>
           ))}
         </div>
@@ -94,7 +101,12 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-6 flex items-end justify-between reveal">
           <h2 className="font-display text-2xl text-ink-900">Featured Products</h2>
-          <Link to="/shop" className="text-sm text-blush-500 hover:underline">See all →</Link>
+          <Link
+            to="/shop"
+            className="text-sm text-blush-500 transition-all duration-200 hover:text-blush-600 hover:translate-x-0.5"
+          >
+            See all →
+          </Link>
         </div>
         <div className="reveal">
           <ProductGrid products={featured} loading={loading} />
@@ -117,12 +129,12 @@ export default function Home() {
               </p>
               <Link
                 to="/shop"
-                className="mt-5 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
+                className="mt-5 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-ink-700 hover:shadow-soft hover:-translate-y-0.5 active:scale-95"
               >
                 Shop the offer
               </Link>
             </div>
-            <div className="rounded-3xl bg-white/70 p-6 text-center backdrop-blur">
+            <div className="rounded-3xl bg-white/70 p-6 text-center backdrop-blur transition-transform duration-500 hover:scale-105">
               <div className="text-6xl">🎁</div>
               <p className="mt-3 text-sm text-ink-700">
                 Free delivery on orders above {storeConfig.currency}{storeConfig.freeDeliveryThreshold}
@@ -148,7 +160,7 @@ export default function Home() {
           Why Shop With Us
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                    {[
+          {[
             { icon: ShieldCheck, title: "Quality Products", text: "Carefully selected for your baby." },
             { icon: RotateCcw, title: "Easy Returns", text: "Hassle-free returns within 7 days." },
             { icon: Truck, title: "Fast Local Delivery", text: "1–3 days in and around the city." },
@@ -159,10 +171,12 @@ export default function Home() {
               key={f.title}
               className={`group rounded-3xl bg-white p-5 text-center shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft reveal stagger-${i + 1}`}
             >
-              <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-blush-50 text-blush-500 transition-transform duration-300 group-hover:scale-110">
+              <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-blush-50 text-blush-500 transition-all duration-300 group-hover:scale-110 group-hover:bg-blush-100">
                 <f.icon size={20} />
               </div>
-              <div className="mt-3 text-sm font-semibold text-ink-900">{f.title}</div>
+              <div className="mt-3 text-sm font-semibold text-ink-900 transition-colors group-hover:text-blush-500">
+                {f.title}
+              </div>
               <div className="mt-1 text-xs text-ink-500">{f.text}</div>
             </div>
           ))}
@@ -175,7 +189,7 @@ export default function Home() {
           What Parents Say
         </h2>
         <div className="grid gap-4 md:grid-cols-3">
-                    {[
+          {[
             {
               name: "Sikander",
               text: "Very good products & you can get products at affordable price.",
@@ -191,9 +205,11 @@ export default function Home() {
           ].map((r, i) => (
             <blockquote
               key={r.name}
-              className={`rounded-3xl bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft reveal stagger-${i + 1}`}
+              className={`group rounded-3xl bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft reveal stagger-${i + 1}`}
             >
-              <div className="text-blush-400">★★★★★</div>
+              <div className="text-blush-400 transition-transform duration-300 group-hover:scale-105">
+                ★★★★★
+              </div>
               <p className="mt-3 text-sm text-ink-700">"{r.text}"</p>
               <footer className="mt-3 text-xs text-ink-500">— {r.name}</footer>
             </blockquote>
@@ -210,7 +226,7 @@ export default function Home() {
             href={whatsappLink(whatsappMessages.general)}
             target="_blank"
             rel="noreferrer"
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-sage-500 px-6 py-3 text-sm font-medium text-white hover:bg-sage-400 transition-transform active:scale-95"
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-sage-500 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-sage-400 hover:shadow-soft hover:-translate-y-0.5 active:scale-95"
           >
             <MessageCircle size={16} /> Chat on WhatsApp
           </a>
