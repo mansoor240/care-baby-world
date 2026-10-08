@@ -65,7 +65,7 @@ export default function Header() {
         </button>
 
         <Link to="/" className="font-display text-xl font-bold text-ink-900">
-          Tiny<span className="text-blush-400">Nest</span>
+          Care<span className="text-blush-400">BabyStore</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 ml-4">
