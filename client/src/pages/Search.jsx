@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "../api/client";
 import ProductGrid from "../components/product/ProductGrid";
-import { Link, useSearchParams } from "react-router-dom";
 
 export default function Search() {
   const [params] = useSearchParams();
@@ -32,7 +31,8 @@ export default function Search() {
 
       <div className="mt-6">
         {loading && <ProductGrid loading />}
-                {!loading && q && results.length === 0 && (
+
+        {!loading && q && results.length === 0 && (
           <div className="rounded-3xl bg-white p-12 text-center shadow-card animate-[fadeIn_0.4s_ease-out]">
             <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-blush-50 text-4xl">
               🔍
@@ -49,6 +49,7 @@ export default function Search() {
             </Link>
           </div>
         )}
+
         {!loading && results.length > 0 && <ProductGrid products={results} />}
       </div>
     </div>
