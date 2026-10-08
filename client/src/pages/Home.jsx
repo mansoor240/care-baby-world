@@ -148,7 +148,7 @@ export default function Home() {
           Why Shop With Us
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {[
+                    {[
             { icon: ShieldCheck, title: "Quality Products", text: "Carefully selected for your baby." },
             { icon: RotateCcw, title: "Easy Returns", text: "Hassle-free returns within 7 days." },
             { icon: Truck, title: "Fast Local Delivery", text: "1–3 days in and around the city." },
@@ -157,9 +157,9 @@ export default function Home() {
           ].map((f, i) => (
             <div
               key={f.title}
-              className={`rounded-3xl bg-white p-5 text-center shadow-card transition hover:-translate-y-1 hover:shadow-soft reveal stagger-${i + 1}`}
+              className={`group rounded-3xl bg-white p-5 text-center shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft reveal stagger-${i + 1}`}
             >
-              <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-blush-50 text-blush-500">
+              <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-blush-50 text-blush-500 transition-transform duration-300 group-hover:scale-110">
                 <f.icon size={20} />
               </div>
               <div className="mt-3 text-sm font-semibold text-ink-900">{f.title}</div>
@@ -175,7 +175,7 @@ export default function Home() {
           What Parents Say
         </h2>
         <div className="grid gap-4 md:grid-cols-3">
-          {[
+                    {[
             {
               name: "Sikander",
               text: "Very good products & you can get products at affordable price.",
@@ -191,7 +191,7 @@ export default function Home() {
           ].map((r, i) => (
             <blockquote
               key={r.name}
-              className={`rounded-3xl bg-white p-6 shadow-card reveal stagger-${i + 1}`}
+              className={`rounded-3xl bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft reveal stagger-${i + 1}`}
             >
               <div className="text-blush-400">★★★★★</div>
               <p className="mt-3 text-sm text-ink-700">"{r.text}"</p>
