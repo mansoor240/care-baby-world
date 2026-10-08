@@ -12,6 +12,7 @@ import Footer from "./components/layout/Footer";
 import AnnouncementBar from "./components/layout/AnnouncementBar";
 import BottomNav from "./components/layout/BottomNav";
 import WhatsAppFloat from "./components/whatsapp/WhatsAppButton";
+import ScrollTop from "./components/layout/ScrollTop";
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -63,6 +64,7 @@ function StoreLayout({ children }) {
       <Footer />
       <BottomNav />
       <WhatsAppFloat />
+      <ScrollTop />
     </div>
   );
 }

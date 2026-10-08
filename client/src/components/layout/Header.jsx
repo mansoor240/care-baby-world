@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
 import { useCart } from "../../context/CartContext";
@@ -16,22 +16,44 @@ const NAV = [
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const cart = useCart();
   const wishlist = useWishlist();
   const { customer, isLoggedIn } = useCustomer();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const submit = (e) => {
     e.preventDefault();
     if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`);
   };
 
-  const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0);
+    const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0);
   const wishCount = wishlist.items.length;
 
+  const [bounce, setBounce] = useState(false);
+  useEffect(() => {
+    if (cartCount === 0) return;
+    setBounce(true);
+    const t = setTimeout(() => setBounce(false), 400);
+    return () => clearTimeout(t);
+  }, [cartCount]);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-ink-900/5 bg-cream/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
+    <header
+      className={`sticky top-0 z-40 border-b transition-all duration-300 ${
+        scrolled
+          ? "border-ink-900/10 bg-cream/95 backdrop-blur shadow-sm"
+          : "border-transparent bg-cream"
+      }`}
+    >
+            <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
         <button
           className="md:hidden -ml-1 p-2 text-ink-900"
           onClick={() => setOpen(!open)}
@@ -81,11 +103,14 @@ export default function Header() {
                 {wishCount}
               </span>
             )}
-          </Link>
-          <Link to="/cart" className="relative p-2" aria-label="Cart">
+                    <Link to="/cart" className="relative p-2" aria-label="Cart">
             <ShoppingBag size={20} />
             {cartCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-blush-400 px-1 text-[10px] font-bold text-white">
+              <span
+                className={`absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-blush-400 px-1 text-[10px] font-bold text-white transition-transform ${
+                  bounce ? "animate-bounce" : ""
+                }`}
+              >
                 {cartCount}
               </span>
             )}
