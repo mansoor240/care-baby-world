@@ -27,8 +27,11 @@ export default function Shop() {
     api.get("/categories").then((r) => setCategories(r.data));
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
+    let cancelled = false;
+    const startedAt = Date.now();
     setLoading(true);
+
     api
       .get("/products", {
         params: {
@@ -42,10 +45,28 @@ export default function Shop() {
         },
       })
       .then((r) => {
-        setProducts(r.data.items);
-        setMeta({ total: r.data.total, page: r.data.page, pages: r.data.pages });
+        if (cancelled) return;
+        const elapsed = Date.now() - startedAt;
+        const wait = Math.max(0, 300 - elapsed);
+
+        setTimeout(() => {
+          if (cancelled) return;
+          setProducts(r.data.items);
+          setMeta({
+            total: r.data.total,
+            page: r.data.page,
+            pages: r.data.pages,
+          });
+          setLoading(false);
+        }, wait);
       })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [filters]);
 
   const update = (patch) => {
@@ -88,15 +109,7 @@ export default function Shop() {
             </select>
           </div>
 
-          <ProductGrid products={products} loading={loading} />
-
-          {!loading && !products.length && (
-            <div className="rounded-3xl bg-white p-12 text-center shadow-card">
-              <div className="text-4xl">🔍</div>
-              <h3 className="mt-3 font-display text-xl">No products found</h3>
-              <p className="mt-1 text-sm text-ink-500">Try adjusting filters or search again.</p>
-            </div>
-          )}
+                    <ProductGrid products={products} loading={loading} />
 
           {meta.pages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-3">

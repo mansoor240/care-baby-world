@@ -16,19 +16,21 @@ export default function Cart() {
   const discount = cart.coupon?.discount || 0;
   const total = subtotal - discount + delivery;
 
-  if (cart.items.length === 0) {
+    if (cart.items.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center">
-        <div className="text-6xl">🛒</div>
-        <h1 className="mt-4 font-display text-2xl">Your cart is empty</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="mx-auto max-w-3xl px-4 py-20 text-center animate-[fadeIn_0.4s_ease-out]">
+        <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl">
+          🛒
+        </div>
+        <h1 className="mt-6 font-display text-2xl">Your cart is empty</h1>
+        <p className="mt-2 text-sm text-ink-500">
           Add some products to get started.
         </p>
         <Link
           to="/shop"
-          className="mt-6 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700"
+          className="mt-8 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
         >
-          Continue Shopping
+          Start Shopping
         </Link>
       </div>
     );

@@ -120,3 +120,15 @@ body {
   50% { transform: scale(1.3); }
   100% { transform: scale(1); }
 }
+
+/* Product fade-in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
