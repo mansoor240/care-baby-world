@@ -16,8 +16,6 @@ function genOrderNumber() {
   return `TN-${ts}${rand}`;
 }
 
-// Lazy-init Razorpay only when keys are configured.
-// If keys are missing, online payments are disabled.
 async function getRazorpay() {
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) return null;
   const { default: Razorpay } = await import("razorpay");
@@ -27,7 +25,7 @@ async function getRazorpay() {
   });
 }
 
-// GET /api/orders/payment-methods — tells frontend what's enabled
+// GET /api/orders/payment-methods
 router.get("/payment-methods", (_req, res) => {
   const online = !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
   res.json({
@@ -43,17 +41,20 @@ router.post("/", optionalCustomer, async (req, res) => {
     const { customer, items, paymentMethod, couponCode } = req.body;
 
     if (!customer || !items?.length)
-      const { deliveryPincodePrefixes = [] } = storeConfig;
+      return res.status(400).json({ error: "Missing customer or items" });
+
+    // Validate delivery pincode is in our zone
+    const { deliveryPincodePrefixes = [] } = storeConfig;
     const pincode = customer.pincode || "";
     const isDeliverable = deliveryPincodePrefixes.some((prefix) =>
       pincode.startsWith(prefix)
     );
     if (!isDeliverable) {
       return res.status(400).json({
-        error: "We currently deliver only in Hyderabad. Contact us on WhatsApp for special requests.",
+        error:
+          "We currently deliver only in Hyderabad. Contact us on WhatsApp for special requests.",
       });
     }
-      return res.status(400).json({ error: "Missing customer or items" });
 
     if (paymentMethod === "online") {
       const rzp = await getRazorpay();
@@ -68,9 +69,13 @@ router.post("/", optionalCustomer, async (req, res) => {
     for (const it of items) {
       const product = await Product.findById(it.productId);
       if (!product)
-        return res.status(400).json({ error: `Product not found: ${it.productId}` });
+        return res
+          .status(400)
+          .json({ error: `Product not found: ${it.productId}` });
       if (product.stock < it.quantity)
-        return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
+        return res
+          .status(400)
+          .json({ error: `Insufficient stock for ${product.name}` });
 
       validated.push({
         productId: product._id,
@@ -85,9 +90,15 @@ router.post("/", optionalCustomer, async (req, res) => {
 
     let coupon = null;
     if (couponCode)
-      coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), active: true });
+      coupon = await Coupon.findOne({
+        code: couponCode.toUpperCase(),
+        active: true,
+      });
 
-    const { subtotal, discount, deliveryFee, total } = calculateTotals(validated, coupon);
+    const { subtotal, discount, deliveryFee, total } = calculateTotals(
+      validated,
+      coupon
+    );
 
     const order = await Order.create({
       orderNumber: genOrderNumber(),
@@ -104,11 +115,13 @@ router.post("/", optionalCustomer, async (req, res) => {
       status: "pending",
     });
 
+    // Auto-save address to customer's account if logged in
     if (req.customerId) {
       const cust = await Customer.findById(req.customerId);
       if (cust && cust.addresses.length < 5) {
         const already = cust.addresses.find(
-          (a) => a.house === customer.house && a.pincode === customer.pincode
+          (a) =>
+            a.house === customer.house && a.pincode === customer.pincode
         );
         if (!already) {
           cust.addresses.push({
@@ -126,19 +139,27 @@ router.post("/", optionalCustomer, async (req, res) => {
       }
     }
 
+    // Decrement stock
     await Promise.all(
       validated.map((it) =>
-        Product.updateOne({ _id: it.productId }, { $inc: { stock: -it.quantity } })
+        Product.updateOne(
+          { _id: it.productId },
+          { $inc: { stock: -it.quantity } }
+        )
       )
     );
 
-    if (coupon) await Coupon.updateOne({ _id: coupon._id }, { $inc: { usageCount: 1 } });
+    if (coupon)
+      await Coupon.updateOne(
+        { _id: coupon._id },
+        { $inc: { usageCount: 1 } }
+      );
 
     // If online payment, create Razorpay order
     if (paymentMethod === "online") {
       const rzp = await getRazorpay();
       const razorpayOrder = await rzp.orders.create({
-        amount: Math.round(total * 100), // paise
+        amount: Math.round(total * 100),
         currency: "INR",
         receipt: order.orderNumber,
         notes: { orderId: order._id.toString() },
@@ -163,12 +184,21 @@ router.post("/", optionalCustomer, async (req, res) => {
 });
 
 // POST /api/orders/verify-payment
-// Called by frontend after Razorpay success. Verifies signature.
 router.post("/verify-payment", async (req, res) => {
   try {
-    const { orderId, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const {
+      orderId,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    } = req.body;
 
-    if (!orderId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    if (
+      !orderId ||
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature
+    ) {
       return res.status(400).json({ error: "Missing payment verification data" });
     }
 
@@ -196,17 +226,23 @@ router.post("/verify-payment", async (req, res) => {
   }
 });
 
-// GET /api/orders/track
+// GET /api/orders/track?orderNumber=TN-XXX&mobile=9876543210
 router.get("/track", async (req, res) => {
   const { orderNumber, mobile } = req.query;
+
   if (!orderNumber || !mobile) {
     return res.status(400).json({ error: "Order number and mobile required" });
   }
+
   const order = await Order.findOne({
     orderNumber: orderNumber.trim(),
     "customer.mobile": mobile.trim(),
   });
-  if (!order) return res.status(404).json({ error: "No order found with these details" });
+
+  if (!order) {
+    return res.status(404).json({ error: "No order found with these details" });
+  }
+
   res.json(order);
 });
 
