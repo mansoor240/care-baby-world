@@ -220,18 +220,18 @@ export default function ProductDetail() {
             </button>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="mt-4 grid grid-cols-2 gap-3">
             <button
               onClick={addToCart}
               disabled={!inStock}
-              className="rounded-full border border-ink-900/15 bg-white py-3 text-sm font-medium hover:bg-cream disabled:opacity-40"
+              className="rounded-full border border-ink-900/15 bg-white py-3 text-sm font-medium hover:bg-cream active:scale-95 transition-transform disabled:opacity-40"
             >
               Add to Cart
             </button>
-            <button
+                     <button
               onClick={buyNow}
               disabled={!inStock}
-              className="rounded-full bg-ink-900 py-3 text-sm font-medium text-white hover:bg-ink-700 disabled:opacity-40"
+              className="rounded-full bg-ink-900 py-3 text-sm font-medium text-white hover:bg-ink-700 active:scale-95 transition-transform disabled:opacity-40"
             >
               Buy Now
             </button>
