@@ -39,11 +39,16 @@ export default function ProductCard({ product }) {
           />
         </div>
 
-                {/* Left-top badges */}
+                       {/* Left-top badges */}
         <div className="absolute left-3 top-3 flex flex-col gap-1">
           {off && (
             <span className="rounded-full bg-blush-400 px-2 py-0.5 text-[11px] font-semibold text-white">
               {off}% OFF
+            </span>
+          )}
+          {product.featured && (
+            <span className="rounded-full bg-lavender-400 px-2 py-0.5 text-[11px] font-semibold text-white">
+              ✦ Featured
             </span>
           )}
           {product.bestseller && (

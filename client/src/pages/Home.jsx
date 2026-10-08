@@ -71,10 +71,10 @@ export default function Home() {
           </div>
           <div className="relative reveal-right">
             <div className="aspect-[4/3] overflow-hidden rounded-4xl bg-white shadow-soft">
-              <img
+                           <img
                 src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1200&q=80"
                 alt="Baby essentials"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover transition-transform duration-[3000ms] ease-out hover:scale-105"
               />
             </div>
           </div>
@@ -87,19 +87,43 @@ export default function Home() {
           <h2 className="font-display text-2xl text-ink-900">Shop by Category</h2>
           <Link to="/shop" className="text-sm text-blush-500 hover:underline">View all →</Link>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {categories.map((c, i) => (
-            <Link
-              key={c.slug}
-              to={`/category/${c.slug}`}
-              className={`group rounded-3xl bg-white p-4 text-center shadow-card transition hover:-translate-y-1 hover:shadow-soft reveal stagger-${Math.min(i + 1, 6)}`}
-            >
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blush-50 text-2xl transition-transform group-hover:scale-110">
-                {c.emoji || "🧸"}
-              </div>
-              <div className="mt-3 text-sm font-medium text-ink-900">{c.name}</div>
-            </Link>
-          ))}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {categories.map((c, i) => {
+            // Rotate background colors for visual variety
+            const bgColors = [
+              "bg-blush-50",
+              "bg-sky-50",
+              "bg-sage-50",
+              "bg-lavender-50",
+              "bg-sand-50",
+            ];
+            const iconColors = [
+              "bg-blush-100 text-blush-500",
+              "bg-sky-100 text-sky-500",
+              "bg-sage-100 text-sage-500",
+              "bg-lavender-100 text-lavender-500",
+              "bg-sand-100 text-sand-500",
+            ];
+            const bg = bgColors[i % bgColors.length];
+            const iconBg = iconColors[i % iconColors.length];
+
+            return (
+              <Link
+                key={c.slug}
+                to={`/category/${c.slug}`}
+                className={`group ${bg} rounded-3xl p-5 text-center shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft reveal stagger-${Math.min(i + 1, 6)}`}
+              >
+                <div
+                  className={`mx-auto grid h-14 w-14 place-items-center rounded-full ${iconBg} text-2xl transition-transform duration-300 group-hover:scale-110`}
+                >
+                  {c.emoji || "🧸"}
+                </div>
+                <div className="mt-3 text-sm font-medium text-ink-900">
+                  {c.name}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
