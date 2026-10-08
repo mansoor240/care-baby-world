@@ -1,10 +1,20 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Home, Grid3x3, Search, Heart, ShoppingBag } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 
 export default function BottomNav() {
   const cart = useCart();
+  const navigate = useNavigate();
+  const location = useLocation();
   const count = cart.items.reduce((s, i) => s + i.quantity, 0);
+
+  // Detect if already on a route — then scroll to top instead
+  const handleTabClick = (to) => (e) => {
+    if (location.pathname === to || (to === "/" && location.pathname === "/")) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   const items = [
     { to: "/", icon: Home, label: "Home" },
@@ -22,8 +32,9 @@ export default function BottomNav() {
             key={it.to}
             to={it.to}
             end={it.to === "/"}
+            onClick={handleTabClick(it.to)}
             className={({ isActive }) =>
-              `relative flex flex-col items-center gap-0.5 py-2 text-[11px] ${
+              `relative flex flex-col items-center gap-0.5 py-2 text-[11px] transition-colors ${
                 isActive ? "text-blush-500" : "text-ink-500"
               }`
             }
