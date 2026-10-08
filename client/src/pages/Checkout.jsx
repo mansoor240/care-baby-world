@@ -93,8 +93,19 @@ export default function Checkout() {
       return toast.error("Enter a valid 10-digit Indian mobile number");
     if (!customer.house || !customer.street || !customer.city || !customer.state)
       return toast.error("Please complete the address");
-    if (!/^\d{6}$/.test(customer.pincode))
+        if (!/^\d{6}$/.test(customer.pincode))
       return toast.error("Enter a valid 6-digit pincode");
+
+    const { prefixes = [], list = [] } = storeConfig.deliveryPincodes || {};
+    const isDeliverable =
+      list.includes(customer.pincode) ||
+      prefixes.some((prefix) => customer.pincode.startsWith(prefix));
+
+    if (!isDeliverable) {
+      return toast.error(
+        "Sorry, we currently deliver only in Hyderabad. Contact us on WhatsApp for special requests."
+      );
+    }
 
     setSubmitting(true);
     try {

@@ -16,11 +16,13 @@ For questions, contact us at ${storeConfig.email}.`,
 
 By placing an order on ${storeConfig.name}, you agree to provide accurate delivery information and to pay the total amount shown at checkout.`,
   },
-  shipping: {
+    shipping: {
     title: "Shipping Policy",
-    body: `Delivery is available in and around ${storeConfig.address.city}. Estimated delivery: ${storeConfig.estimatedDelivery}.
+    body: `Delivery is available in Hyderabad and surrounding metro areas (pincodes starting with 500, 501, and 502). Estimated delivery: ${storeConfig.estimatedDelivery}.
 
-Free delivery on orders above ${storeConfig.currency}${storeConfig.freeDeliveryThreshold}. A delivery fee of ${storeConfig.currency}${storeConfig.deliveryFee} applies below this threshold.`,
+Free delivery on orders above ${storeConfig.currency}${storeConfig.freeDeliveryThreshold}. A delivery fee of ${storeConfig.currency}${storeConfig.deliveryFee} applies below this threshold.
+
+For delivery outside these areas, please contact us on WhatsApp before placing your order.`,
   },
   returns: {
     title: "Return & Refund Policy",

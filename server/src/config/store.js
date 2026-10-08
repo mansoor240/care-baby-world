@@ -8,4 +8,5 @@ export const storeConfig = {
   freeDeliveryThreshold: Number(process.env.FREE_DELIVERY_THRESHOLD || 999),
   currency: "INR",
   currencySymbol: "₹",
+  deliveryPincodePrefixes: ["500", "501", "502"],
 };

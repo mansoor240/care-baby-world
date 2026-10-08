@@ -19,8 +19,8 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [size, setSize] = useState("");
   const [pincode, setPincode] = useState("");
-  const [pinMsg, setPinMsg] = useState("");
-
+  const [pinMsg, setPinMsg] = useState(null);
+  
   const cart = useCart();
   const wishlist = useWishlist();
 
@@ -82,15 +82,35 @@ export default function ProductDetail() {
     navigate("/checkout");
   };
 
-  const checkPin = (e) => {
+    const checkPin = (e) => {
     e.preventDefault();
+
+    // Validate format
     if (!/^\d{6}$/.test(pincode)) {
-      setPinMsg("Enter a valid 6-digit pincode");
+      setPinMsg({
+        type: "error",
+        text: "Enter a valid 6-digit pincode",
+      });
       return;
     }
-    setPinMsg(
-      `✅ Delivers to ${pincode} in ${storeConfig.estimatedDelivery} · Free above ₹${storeConfig.freeDeliveryThreshold}`
-    );
+
+    // Check if pincode is in delivery zone
+    const { prefixes = [], list = [] } = storeConfig.deliveryPincodes || {};
+    const isDeliverable =
+      list.includes(pincode) ||
+      prefixes.some((prefix) => pincode.startsWith(prefix));
+
+    if (isDeliverable) {
+      setPinMsg({
+        type: "success",
+        text: `✅ Delivers to ${pincode} in ${storeConfig.estimatedDelivery} · Free above ${storeConfig.currency}${storeConfig.freeDeliveryThreshold}`,
+      });
+    } else {
+      setPinMsg({
+        type: "error",
+        text: `❌ Sorry, we currently deliver only in Hyderabad. Contact us on WhatsApp for special requests.`,
+      });
+    }
   };
 
   return (
@@ -254,8 +274,17 @@ export default function ProductDetail() {
                 Check
               </button>
             </div>
-            {pinMsg && <p className="mt-2 text-xs text-ink-500">{pinMsg}</p>}
-          </form>
+            {pinMsg && (
+              <p
+                className={`mt-2 text-xs ${
+                  pinMsg.type === "success"
+                    ? "text-sage-500"
+                    : "text-red-500"
+                }`}
+              >
+                {pinMsg.text}
+              </p>
+            )}          </form>
 
           {/* SHIPPING / RETURNS */}
           <div className="mt-6 grid gap-3 sm:grid-cols-3">

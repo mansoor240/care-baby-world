@@ -6,6 +6,7 @@ import Coupon from "../models/Coupon.js";
 import Customer from "../models/Customer.js";
 import { calculateTotals } from "../utils/totals.js";
 import { optionalCustomer } from "../middleware/customerAuth.js";
+import { storeConfig } from "../config/store.js";
 
 const router = Router();
 
@@ -42,6 +43,16 @@ router.post("/", optionalCustomer, async (req, res) => {
     const { customer, items, paymentMethod, couponCode } = req.body;
 
     if (!customer || !items?.length)
+      const { deliveryPincodePrefixes = [] } = storeConfig;
+    const pincode = customer.pincode || "";
+    const isDeliverable = deliveryPincodePrefixes.some((prefix) =>
+      pincode.startsWith(prefix)
+    );
+    if (!isDeliverable) {
+      return res.status(400).json({
+        error: "We currently deliver only in Hyderabad. Contact us on WhatsApp for special requests.",
+      });
+    }
       return res.status(400).json({ error: "Missing customer or items" });
 
     if (paymentMethod === "online") {
