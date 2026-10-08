@@ -1,4 +1,5 @@
 import { Router } from "express";
+import crypto from "crypto";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Coupon from "../models/Coupon.js";
@@ -14,6 +15,27 @@ function genOrderNumber() {
   return `TN-${ts}${rand}`;
 }
 
+// Lazy-init Razorpay only when keys are configured.
+// If keys are missing, online payments are disabled.
+async function getRazorpay() {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) return null;
+  const { default: Razorpay } = await import("razorpay");
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+}
+
+// GET /api/orders/payment-methods — tells frontend what's enabled
+router.get("/payment-methods", (_req, res) => {
+  const online = !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+  res.json({
+    cod: true,
+    online,
+    razorpayKeyId: online ? process.env.RAZORPAY_KEY_ID : null,
+  });
+});
+
 // POST /api/orders
 router.post("/", optionalCustomer, async (req, res) => {
   try {
@@ -22,11 +44,20 @@ router.post("/", optionalCustomer, async (req, res) => {
     if (!customer || !items?.length)
       return res.status(400).json({ error: "Missing customer or items" });
 
-    // Validate & re-price every item from DB (never trust client prices)
+    if (paymentMethod === "online") {
+      const rzp = await getRazorpay();
+      if (!rzp) {
+        return res.status(400).json({
+          error: "Online payments are not enabled. Please choose Cash on Delivery.",
+        });
+      }
+    }
+
     const validated = [];
     for (const it of items) {
       const product = await Product.findById(it.productId);
-      if (!product) return res.status(400).json({ error: `Product not found: ${it.productId}` });
+      if (!product)
+        return res.status(400).json({ error: `Product not found: ${it.productId}` });
       if (product.stock < it.quantity)
         return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
 
@@ -42,7 +73,8 @@ router.post("/", optionalCustomer, async (req, res) => {
     }
 
     let coupon = null;
-    if (couponCode) coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), active: true });
+    if (couponCode)
+      coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), active: true });
 
     const { subtotal, discount, deliveryFee, total } = calculateTotals(validated, coupon);
 
@@ -61,7 +93,6 @@ router.post("/", optionalCustomer, async (req, res) => {
       status: "pending",
     });
 
-    // Auto-save address to customer's account if logged in
     if (req.customerId) {
       const cust = await Customer.findById(req.customerId);
       if (cust && cust.addresses.length < 5) {
@@ -84,7 +115,6 @@ router.post("/", optionalCustomer, async (req, res) => {
       }
     }
 
-    // Decrement stock
     await Promise.all(
       validated.map((it) =>
         Product.updateOne({ _id: it.productId }, { $inc: { stock: -it.quantity } })
@@ -93,6 +123,27 @@ router.post("/", optionalCustomer, async (req, res) => {
 
     if (coupon) await Coupon.updateOne({ _id: coupon._id }, { $inc: { usageCount: 1 } });
 
+    // If online payment, create Razorpay order
+    if (paymentMethod === "online") {
+      const rzp = await getRazorpay();
+      const razorpayOrder = await rzp.orders.create({
+        amount: Math.round(total * 100), // paise
+        currency: "INR",
+        receipt: order.orderNumber,
+        notes: { orderId: order._id.toString() },
+      });
+
+      order.razorpayOrderId = razorpayOrder.id;
+      await order.save();
+
+      return res.status(201).json({
+        ...order.toObject(),
+        razorpayOrderId: razorpayOrder.id,
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+        amount: Math.round(total * 100),
+      });
+    }
+
     res.status(201).json(order);
   } catch (err) {
     console.error(err);
@@ -100,30 +151,55 @@ router.post("/", optionalCustomer, async (req, res) => {
   }
 });
 
-// ⚠️ IMPORTANT: Specific routes (/track, /by-id/:id) MUST come before /:orderNumber
-// Otherwise Express treats "track" or "by-id" as an order number.
+// POST /api/orders/verify-payment
+// Called by frontend after Razorpay success. Verifies signature.
+router.post("/verify-payment", async (req, res) => {
+  try {
+    const { orderId, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-// GET /api/orders/track?orderNumber=TN-XXX&mobile=9876543210
+    if (!orderId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ error: "Missing payment verification data" });
+    }
+
+    const expected = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (expected !== razorpay_signature) {
+      return res.status(400).json({ error: "Payment verification failed" });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    order.paymentStatus = "paid";
+    order.status = "confirmed";
+    order.razorpayPaymentId = razorpay_payment_id;
+    await order.save();
+
+    res.json({ ok: true, order });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not verify payment" });
+  }
+});
+
+// GET /api/orders/track
 router.get("/track", async (req, res) => {
   const { orderNumber, mobile } = req.query;
-
   if (!orderNumber || !mobile) {
     return res.status(400).json({ error: "Order number and mobile required" });
   }
-
   const order = await Order.findOne({
     orderNumber: orderNumber.trim(),
     "customer.mobile": mobile.trim(),
   });
-
-  if (!order) {
-    return res.status(404).json({ error: "No order found with these details" });
-  }
-
+  if (!order) return res.status(404).json({ error: "No order found with these details" });
   res.json(order);
 });
 
-// GET /api/orders/by-id/:id — fetch single order by Mongo ID
+// GET /api/orders/by-id/:id
 router.get("/by-id/:id", async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -134,8 +210,7 @@ router.get("/by-id/:id", async (req, res) => {
   }
 });
 
-// GET /api/orders/:orderNumber (public — for confirmation page)
-// ⚠️ This is the LAST route — it matches anything, so specific routes go above.
+// GET /api/orders/:orderNumber
 router.get("/:orderNumber", async (req, res) => {
   const order = await Order.findOne({ orderNumber: req.params.orderNumber });
   if (!order) return res.status(404).json({ error: "Order not found" });

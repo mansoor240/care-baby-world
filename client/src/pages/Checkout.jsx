@@ -22,11 +22,25 @@ export default function Checkout() {
   const cart = useCart();
   const { customer: loggedInCustomer, isLoggedIn } = useCustomer();
   const navigate = useNavigate();
+
   const [customer, setCustomer] = useState(initialAddr);
   const [payment, setPayment] = useState("cod");
+  const [paymentMethods, setPaymentMethods] = useState({
+    cod: true,
+    online: false,
+    razorpayKeyId: null,
+  });
   const [couponCode, setCouponCode] = useState(cart.coupon?.code || "");
   const [applying, setApplying] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Fetch available payment methods from backend
+  useEffect(() => {
+    api
+      .get("/orders/payment-methods")
+      .then((r) => setPaymentMethods(r.data))
+      .catch(() => {});
+  }, []);
 
   // Auto-fill from logged-in customer
   useEffect(() => {
@@ -74,21 +88,20 @@ export default function Checkout() {
   const submit = async (e) => {
     e.preventDefault();
 
-    // Client-side validation (server re-validates)
     if (!customer.fullName.trim()) return toast.error("Full name required");
     if (!/^[6-9]\d{9}$/.test(customer.mobile.replace(/\D/g, "").slice(-10)))
       return toast.error("Enter a valid 10-digit Indian mobile number");
     if (!customer.house || !customer.street || !customer.city || !customer.state)
       return toast.error("Please complete the address");
-    if (!/^\d{6}$/.test(customer.pincode)) return toast.error("Enter a valid 6-digit pincode");
-
-    if (payment === "online") {
-      toast.error("Online payments are not enabled in this demo. Please choose Cash on Delivery.");
-      return;
-    }
+    if (!/^\d{6}$/.test(customer.pincode))
+      return toast.error("Enter a valid 6-digit pincode");
 
     setSubmitting(true);
     try {
+      const headers = {};
+      const token = localStorage.getItem("tn_customer_token");
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const payload = {
         customer,
         items: cart.items.map((i) => ({
@@ -99,17 +112,59 @@ export default function Checkout() {
         paymentMethod: payment,
         couponCode: cart.coupon?.code || "",
       };
-            const headers = {};
-      const token = localStorage.getItem("tn_customer_token");
-      if (token) headers.Authorization = `Bearer ${token}`;
 
       const { data } = await api.post("/orders", payload, { headers });
-      cart.clear();
-      toast.success("Order placed!");
-      navigate(`/order/${data.orderNumber}`);
-    } catch (e) {
-      toast.error(e.response?.data?.error || "Could not place order");
-    } finally {
+
+      // COD → done
+      if (payment === "cod") {
+        cart.clear();
+        toast.success("Order placed!");
+        navigate(`/order/${data.orderNumber}`);
+        return;
+      }
+
+      // Online payment → open Razorpay popup
+      const options = {
+        key: data.razorpayKeyId,
+        amount: data.amount,
+        currency: "INR",
+        name: "Care Baby World",
+        description: `Order ${data.orderNumber}`,
+        order_id: data.razorpayOrderId,
+        prefill: {
+          name: customer.fullName,
+          email: customer.email || "",
+          contact: customer.mobile,
+        },
+        theme: { color: "#E2708F" },
+        handler: async (response) => {
+          try {
+            await api.post("/orders/verify-payment", {
+              orderId: data._id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            cart.clear();
+            toast.success("Payment successful!");
+            navigate(`/order/${data.orderNumber}`);
+          } catch {
+            toast.error("Payment received but verification failed. Contact support.");
+            navigate(`/order/${data.orderNumber}`);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            toast.error("Payment cancelled. You can try again.");
+            setSubmitting(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Could not place order");
       setSubmitting(false);
     }
   };
@@ -124,10 +179,29 @@ export default function Checkout() {
           <section className="rounded-3xl bg-white p-6 shadow-card">
             <h2 className="font-display text-lg">Contact</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <Field label="Full Name *" value={customer.fullName} onChange={(v) => setCustomer({ ...customer, fullName: v })} />
-              <Field label="Mobile Number *" value={customer.mobile} onChange={(v) => setCustomer({ ...customer, mobile: v.replace(/\D/g, "").slice(0, 10) })} placeholder="10-digit Indian mobile" />
+              <Field
+                label="Full Name *"
+                value={customer.fullName}
+                onChange={(v) => setCustomer({ ...customer, fullName: v })}
+              />
+              <Field
+                label="Mobile Number *"
+                value={customer.mobile}
+                onChange={(v) =>
+                  setCustomer({
+                    ...customer,
+                    mobile: v.replace(/\D/g, "").slice(0, 10),
+                  })
+                }
+                placeholder="10-digit Indian mobile"
+              />
               <div className="sm:col-span-2">
-                <Field label="Email (optional)" value={customer.email} onChange={(v) => setCustomer({ ...customer, email: v })} type="email" />
+                <Field
+                  label="Email (optional)"
+                  value={customer.email}
+                  onChange={(v) => setCustomer({ ...customer, email: v })}
+                  type="email"
+                />
               </div>
             </div>
           </section>
@@ -137,39 +211,69 @@ export default function Checkout() {
             <h2 className="font-display text-lg">Delivery Address</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <Field label="House / Flat / Building *" value={customer.house} onChange={(v) => setCustomer({ ...customer, house: v })} />
+                <Field
+                  label="House / Flat / Building *"
+                  value={customer.house}
+                  onChange={(v) => setCustomer({ ...customer, house: v })}
+                />
               </div>
               <div className="sm:col-span-2">
-                <Field label="Street / Area *" value={customer.street} onChange={(v) => setCustomer({ ...customer, street: v })} />
+                <Field
+                  label="Street / Area *"
+                  value={customer.street}
+                  onChange={(v) => setCustomer({ ...customer, street: v })}
+                />
               </div>
-              <Field label="City *" value={customer.city} onChange={(v) => setCustomer({ ...customer, city: v })} />
-              <Field label="State *" value={customer.state} onChange={(v) => setCustomer({ ...customer, state: v })} />
-              <Field label="Pincode *" value={customer.pincode} onChange={(v) => setCustomer({ ...customer, pincode: v.replace(/\D/g, "").slice(0, 6) })} />
+              <Field
+                label="City *"
+                value={customer.city}
+                onChange={(v) => setCustomer({ ...customer, city: v })}
+              />
+              <Field
+                label="State *"
+                value={customer.state}
+                onChange={(v) => setCustomer({ ...customer, state: v })}
+              />
+              <Field
+                label="Pincode *"
+                value={customer.pincode}
+                onChange={(v) =>
+                  setCustomer({
+                    ...customer,
+                    pincode: v.replace(/\D/g, "").slice(0, 6),
+                  })
+                }
+              />
             </div>
           </section>
 
           {/* Payment */}
           <section className="rounded-3xl bg-white p-6 shadow-card">
             <h2 className="font-display text-lg">Payment Method</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div
+              className={`mt-4 grid gap-3 ${
+                paymentMethods.online ? "sm:grid-cols-2" : ""
+              }`}
+            >
               <PayOption
                 active={payment === "cod"}
                 onClick={() => setPayment("cod")}
                 title="Cash on Delivery"
                 subtitle="Pay when you receive"
               />
-              <PayOption
-                active={payment === "online"}
-                onClick={() => setPayment("online")}
-                title="Online Payment"
-                subtitle="UPI / Cards / Netbanking"
-                badge="Coming soon"
-              />
+              {paymentMethods.online && (
+                <PayOption
+                  active={payment === "online"}
+                  onClick={() => setPayment("online")}
+                  title="Online Payment"
+                  subtitle="UPI / Cards / Netbanking"
+                />
+              )}
             </div>
             {payment === "online" && (
               <p className="mt-3 rounded-2xl bg-sand-50 p-3 text-xs text-ink-700">
-                Online payments require a Razorpay (or similar) integration.
-                Add your keys on the server to enable this option.
+                You'll be redirected to a secure payment page to complete your
+                order.
               </p>
             )}
           </section>
@@ -182,7 +286,11 @@ export default function Checkout() {
           <ul className="mt-4 space-y-3">
             {cart.items.map((i) => (
               <li key={i.key} className="flex gap-3">
-                <img src={i.image} alt="" className="h-14 w-14 rounded-2xl object-cover" />
+                <img
+                  src={i.image}
+                  alt=""
+                  className="h-14 w-14 rounded-2xl object-cover"
+                />
                 <div className="flex-1 text-sm">
                   <div className="line-clamp-1">{i.name}</div>
                   <div className="text-xs text-ink-500">
@@ -217,8 +325,16 @@ export default function Checkout() {
 
           <div className="mt-4 space-y-2 text-sm">
             <Row label="Subtotal" value={formatPrice(subtotal)} />
-            {discount > 0 && <Row label={`Discount (${cart.coupon.code})`} value={`− ${formatPrice(discount)}`} />}
-            <Row label="Delivery" value={delivery === 0 ? "Free" : formatPrice(delivery)} />
+            {discount > 0 && (
+              <Row
+                label={`Discount (${cart.coupon.code})`}
+                value={`− ${formatPrice(discount)}`}
+              />
+            )}
+            <Row
+              label="Delivery"
+              value={delivery === 0 ? "Free" : formatPrice(delivery)}
+            />
             <div className="border-t border-ink-900/10 pt-2" />
             <Row label="Total" value={formatPrice(total)} bold />
           </div>
@@ -232,7 +348,10 @@ export default function Checkout() {
           </button>
           <p className="mt-2 text-center text-xs text-ink-500">
             By placing this order you agree to our{" "}
-            <a href="/policies/terms" className="underline">Terms</a>.
+            <a href="/policies/terms" className="underline">
+              Terms
+            </a>
+            .
           </p>
         </aside>
       </form>
@@ -243,7 +362,9 @@ export default function Checkout() {
 function Field({ label, value, onChange, type = "text", placeholder }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-ink-700">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-ink-700">
+        {label}
+      </span>
       <input
         type={type}
         value={value}
@@ -279,7 +400,11 @@ function PayOption({ active, onClick, title, subtitle, badge }) {
 
 function Row({ label, value, bold }) {
   return (
-    <div className={`flex justify-between ${bold ? "font-semibold text-ink-900" : "text-ink-700"}`}>
+    <div
+      className={`flex justify-between ${
+        bold ? "font-semibold text-ink-900" : "text-ink-700"
+      }`}
+    >
       <span>{label}</span>
       <span>{value}</span>
     </div>
