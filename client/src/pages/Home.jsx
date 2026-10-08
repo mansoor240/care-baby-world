@@ -41,7 +41,7 @@ export default function Home() {
             <p className="mt-4 max-w-md text-ink-500">
               Baby essentials, clothing, toys and care products — all in one place. Delivered to your doorstep.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+                        <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 to="/shop"
                 className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
@@ -54,6 +54,19 @@ export default function Home() {
               >
                 Explore Categories
               </Link>
+            </div>
+
+            {/* Trust pills */}
+            <div className="mt-8 flex flex-wrap gap-2 text-xs text-ink-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-card">
+                🚚 Free delivery above ₹999
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-card">
+                ✅ 100% Authentic
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-card">
+                🔄 7-day returns
+              </span>
             </div>
           </div>
           <div className="relative reveal-right">

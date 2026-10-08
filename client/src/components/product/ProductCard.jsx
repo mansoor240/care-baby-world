@@ -39,11 +39,24 @@ export default function ProductCard({ product }) {
           />
         </div>
 
-        {off && (
-          <span className="absolute left-3 top-3 rounded-full bg-blush-400 px-2 py-0.5 text-[11px] font-semibold text-white">
-            {off}% OFF
-          </span>
-        )}
+                {/* Left-top badges */}
+        <div className="absolute left-3 top-3 flex flex-col gap-1">
+          {off && (
+            <span className="rounded-full bg-blush-400 px-2 py-0.5 text-[11px] font-semibold text-white">
+              {off}% OFF
+            </span>
+          )}
+          {product.bestseller && (
+            <span className="rounded-full bg-sand-400 px-2 py-0.5 text-[11px] font-semibold text-white">
+              ★ Bestseller
+            </span>
+          )}
+          {!inStock && (
+            <span className="rounded-full bg-ink-700 px-2 py-0.5 text-[11px] font-semibold text-white">
+              Sold Out
+            </span>
+          )}
+        </div>
 
         <button
           onClick={toggle}
