@@ -17,11 +17,13 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [bounce, setBounce] = useState(false);
   const navigate = useNavigate();
   const cart = useCart();
   const wishlist = useWishlist();
   const { customer, isLoggedIn } = useCustomer();
 
+  // Header scroll effect
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
@@ -29,21 +31,21 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const submit = (e) => {
-    e.preventDefault();
-    if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`);
-  };
-
-    const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0);
+  const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0);
   const wishCount = wishlist.items.length;
 
-  const [bounce, setBounce] = useState(false);
+  // Cart bounce effect
   useEffect(() => {
     if (cartCount === 0) return;
     setBounce(true);
     const t = setTimeout(() => setBounce(false), 400);
     return () => clearTimeout(t);
   }, [cartCount]);
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`);
+  };
 
   return (
     <header
@@ -53,7 +55,7 @@ export default function Header() {
           : "border-transparent bg-cream"
       }`}
     >
-            <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
         <button
           className="md:hidden -ml-1 p-2 text-ink-900"
           onClick={() => setOpen(!open)}
@@ -63,7 +65,7 @@ export default function Header() {
         </button>
 
         <Link to="/" className="font-display text-xl font-bold text-ink-900">
-          Care<span className="text-blush-400">BabyStore</span>
+          Tiny<span className="text-blush-400">Nest</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 ml-4">
@@ -72,7 +74,9 @@ export default function Header() {
               key={n.to}
               to={n.to}
               className={({ isActive }) =>
-                `text-sm ${isActive ? "text-ink-900 font-semibold" : "text-ink-500 hover:text-ink-900"}`
+                `text-sm ${
+                  isActive ? "text-ink-900 font-semibold" : "text-ink-500 hover:text-ink-900"
+                }`
               }
             >
               {n.label}
@@ -96,6 +100,7 @@ export default function Header() {
           <Link to="/search" className="md:hidden p-2" aria-label="Search">
             <Search size={20} />
           </Link>
+
           <Link to="/wishlist" className="relative p-2" aria-label="Wishlist">
             <Heart size={20} />
             {wishCount > 0 && (
@@ -103,7 +108,9 @@ export default function Header() {
                 {wishCount}
               </span>
             )}
-                    <Link to="/cart" className="relative p-2" aria-label="Cart">
+          </Link>
+
+          <Link to="/cart" className="relative p-2" aria-label="Cart">
             <ShoppingBag size={20} />
             {cartCount > 0 && (
               <span
@@ -115,7 +122,8 @@ export default function Header() {
               </span>
             )}
           </Link>
-                    {isLoggedIn ? (
+
+          {isLoggedIn ? (
             <Link
               to="/account"
               className="hidden md:flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-3 py-1.5 text-sm hover:bg-cream"
@@ -134,7 +142,12 @@ export default function Header() {
               Login
             </Link>
           )}
-          <Link to={isLoggedIn ? "/account" : "/login"} className="md:hidden p-2" aria-label="Account">
+
+          <Link
+            to={isLoggedIn ? "/account" : "/login"}
+            className="md:hidden p-2"
+            aria-label="Account"
+          >
             <User size={20} />
           </Link>
         </div>
