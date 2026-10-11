@@ -23,14 +23,12 @@ export const storeConfig = {
   deliveryFee: 49,
   estimatedDelivery: "1 – 3 business days",
 
-  // 👇 ADD THIS BLOCK
-  // Delivery pincodes for Hyderabad & surrounding metro areas.
-  // Any pincode that starts with one of these prefixes will be accepted.
+  
   deliveryPincodes: {
     prefixes: ["500", "501", "502"],
     list: [], // Optional: add exact pincodes for special zones
   },
-  // 👆
+  
 
   social: {
     instagram: "https://instagram.com/CareBabyStore",

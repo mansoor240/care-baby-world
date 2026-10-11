@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
         <div>
           <h3 className="font-display text-lg font-bold">
-            Care<span className="text-blush-400">Baby</span>
+            Care<span className="text-blush-400">BabyStore</span>
           </h3>
           <p className="mt-2 text-sm text-ink-500">{storeConfig.tagline}</p>
           <p className="mt-4 text-xs text-ink-500">
