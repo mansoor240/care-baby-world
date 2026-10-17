@@ -51,6 +51,14 @@ export default function Search() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
+            <nav className="mb-3 text-xs text-ink-500">
+        <Link to="/" className="hover:text-ink-900 transition">
+          Home
+        </Link>
+        <span className="mx-1.5">/</span>
+        <span className="text-ink-900">Search</span>
+      </nav>
+
       <h1 className="font-display text-3xl">Search</h1>
       <p className="mt-1 text-sm text-ink-500">
         Find your favourite baby products.

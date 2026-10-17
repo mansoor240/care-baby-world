@@ -32,8 +32,12 @@ export default function Category() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <nav className="text-xs text-ink-500">
-        Home / <span className="text-ink-900">{category?.name || "Category"}</span>
+            <nav className="text-xs text-ink-500">
+        <Link to="/" className="hover:text-ink-900 transition">
+          Home
+        </Link>
+        <span className="mx-1.5">/</span>
+        <span className="text-ink-900">{category?.name || "Category"}</span>
       </nav>
 
       <header className="mt-4 rounded-4xl bg-gradient-to-r from-blush-50 to-sand-50 p-8">
