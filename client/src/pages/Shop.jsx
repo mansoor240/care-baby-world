@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "../api/client";
 import ProductGrid from "../components/product/ProductGrid";
 import Filters from "../components/product/Filters";
