@@ -32,7 +32,7 @@ export default function Category() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-            <nav className="text-xs text-ink-500">
+      <nav className="text-xs text-ink-500">
         <Link to="/" className="hover:text-ink-900 transition">
           Home
         </Link>
@@ -61,12 +61,39 @@ export default function Category() {
         </select>
       </div>
 
-            <div className="mt-6">
-        <ProductGrid
-          key={`${slug}-${sort}-${page}`}
-          products={products}
-          loading={loading}
-        />
+      <div className="mt-6">
+        {!loading && products.length === 0 ? (
+          <div className="rounded-3xl bg-white p-12 text-center shadow-card animate-[fadeIn_0.4s_ease-out]">
+            <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl">
+              🌱
+            </div>
+            <h3 className="mt-6 font-display text-2xl">Coming soon</h3>
+            <p className="mt-2 max-w-md mx-auto text-sm text-ink-500">
+              We're adding products to <strong>{category?.name || "this category"}</strong>.
+              Check back soon or explore other categories.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/shop"
+                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
+              >
+                Browse all products
+              </Link>
+              <Link
+                to="/"
+                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-transform active:scale-95"
+              >
+                Go home
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <ProductGrid
+            key={`${slug}-${sort}-${page}`}
+            products={products}
+            loading={loading}
+          />
+        )}
       </div>
 
       {meta.pages > 1 && (

@@ -184,15 +184,20 @@ export default function MyAccount() {
         )}
 
         {!loading && orders.length === 0 && (
-          <div className="rounded-3xl bg-white p-12 text-center shadow-card">
-            <div className="text-4xl">📦</div>
-            <h3 className="mt-3 font-display text-xl">No orders yet</h3>
-            <p className="mt-1 text-sm text-ink-500">Start shopping to place your first order.</p>
+          <div className="rounded-3xl bg-white p-12 text-center shadow-card animate-[fadeIn_0.4s_ease-out]">
+            <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl">
+              📦
+            </div>
+            <h3 className="mt-6 font-display text-2xl">No orders yet</h3>
+            <p className="mt-2 max-w-md mx-auto text-sm text-ink-500">
+              When you place your first order, you'll see it here. You can
+              track its status anytime.
+            </p>
             <Link
               to="/shop"
-              className="mt-5 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700"
+              className="mt-8 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
             >
-              Shop Now
+              Start shopping
             </Link>
           </div>
         )}
@@ -327,7 +332,6 @@ function OrderCard({ order }) {
         </div>
       </div>
 
-      {/* Progress bar */}
       {!isCancelled && (
         <div className="px-5 pt-4">
           <div className="flex items-center">

@@ -27,7 +27,7 @@ export default function Shop() {
     api.get("/categories").then((r) => setCategories(r.data));
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     let cancelled = false;
     const startedAt = Date.now();
     setLoading(true);
@@ -84,7 +84,7 @@ export default function Shop() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-            <nav className="mb-3 text-xs text-ink-500">
+      <nav className="mb-3 text-xs text-ink-500">
         <Link to="/" className="hover:text-ink-900 transition">
           Home
         </Link>
@@ -117,8 +117,37 @@ export default function Shop() {
             </select>
           </div>
 
-                    <ProductGrid key={`${filters.category}-${filters.sort}-${filters.page}`}
-                    products={products} loading={loading} />
+          {!loading && products.length === 0 ? (
+            <div className="rounded-3xl bg-white p-12 text-center shadow-card animate-[fadeIn_0.4s_ease-out]">
+              <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl">
+                🔍
+              </div>
+              <h3 className="mt-6 font-display text-2xl">No products match</h3>
+              <p className="mt-2 text-sm text-ink-500">
+                Try adjusting your filters or search again.
+              </p>
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <button
+                  onClick={() => setParams(new URLSearchParams())}
+                  className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
+                >
+                  Clear all filters
+                </button>
+                <Link
+                  to="/shop"
+                  className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-transform active:scale-95"
+                >
+                  View all products
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <ProductGrid
+              key={`${filters.category}-${filters.sort}-${filters.page}`}
+              products={products}
+              loading={loading}
+            />
+          )}
 
           {meta.pages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-3">

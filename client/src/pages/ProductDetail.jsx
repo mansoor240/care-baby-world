@@ -20,7 +20,7 @@ export default function ProductDetail() {
   const [size, setSize] = useState("");
   const [pincode, setPincode] = useState("");
   const [pinMsg, setPinMsg] = useState(null);
-  
+
   const cart = useCart();
   const wishlist = useWishlist();
 
@@ -82,10 +82,9 @@ export default function ProductDetail() {
     navigate("/checkout");
   };
 
-    const checkPin = (e) => {
+  const checkPin = (e) => {
     e.preventDefault();
 
-    // Validate format
     if (!/^\d{6}$/.test(pincode)) {
       setPinMsg({
         type: "error",
@@ -94,7 +93,6 @@ export default function ProductDetail() {
       return;
     }
 
-    // Check if pincode is in delivery zone
     const { prefixes = [], list = [] } = storeConfig.deliveryPincodes || {};
     const isDeliverable =
       list.includes(pincode) ||
@@ -162,6 +160,33 @@ export default function ProductDetail() {
               {inStock ? `In stock (${product.stock})` : "Out of stock"}
             </span>
           </div>
+
+          {!inStock && (
+            <div className="mt-4 rounded-2xl border border-sand-200 bg-sand-50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">⚠️</div>
+                <div className="flex-1">
+                  <div className="font-semibold text-ink-900">
+                    Currently out of stock
+                  </div>
+                  <p className="mt-1 text-sm text-ink-700">
+                    This product is temporarily unavailable. Message us on
+                    WhatsApp to get notified when it's back.
+                  </p>
+                  <a
+                    href={whatsappLink(
+                      `Hi! I'd like to know when "${product.name}" is back in stock.`
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex items-center gap-2 rounded-full bg-sage-500 px-4 py-2 text-sm font-medium text-white hover:bg-sage-400 transition"
+                  >
+                    <MessageCircle size={14} /> Notify me
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-4 flex items-baseline gap-3">
             <span className="text-3xl font-semibold">{formatPrice(product.price)}</span>
@@ -240,7 +265,7 @@ export default function ProductDetail() {
             </button>
           </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-2 gap-3">
             <button
               onClick={addToCart}
               disabled={!inStock}
@@ -248,7 +273,7 @@ export default function ProductDetail() {
             >
               Add to Cart
             </button>
-                     <button
+            <button
               onClick={buyNow}
               disabled={!inStock}
               className="rounded-full bg-ink-900 py-3 text-sm font-medium text-white hover:bg-ink-700 active:scale-95 transition-transform disabled:opacity-40"
@@ -277,14 +302,13 @@ export default function ProductDetail() {
             {pinMsg && (
               <p
                 className={`mt-2 text-xs ${
-                  pinMsg.type === "success"
-                    ? "text-sage-500"
-                    : "text-red-500"
+                  pinMsg.type === "success" ? "text-sage-500" : "text-red-500"
                 }`}
               >
                 {pinMsg.text}
               </p>
-            )}          </form>
+            )}
+          </form>
 
           {/* SHIPPING / RETURNS */}
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
