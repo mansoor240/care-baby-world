@@ -154,3 +154,77 @@ body {
 .fade-in-data {
   animation: smoothFadeIn 0.4s ease-out forwards;
 }
+/* ─── PRODUCT DETAIL PAGE HOVERS ──────────────────── */
+.hover-price {
+  transition: transform 0.2s ease;
+}
+.hover-price:hover {
+  transform: translateX(2px);
+}
+
+.size-btn {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.size-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -4px rgba(226, 112, 143, 0.3);
+}
+
+.action-btn-primary {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.action-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -6px rgba(31, 27, 36, 0.4);
+}
+.action-btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.action-btn-secondary {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.action-btn-secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background-color: #FDFBF7;
+  box-shadow: 0 8px 20px -6px rgba(31, 27, 36, 0.12);
+}
+.action-btn-secondary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.trust-badge {
+  transition: all 0.25s ease;
+}
+.trust-badge:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px -6px rgba(31, 27, 36, 0.12);
+}
+
+.thumb-btn {
+  cursor: pointer;
+}
+.thumb-btn:hover {
+  transform: scale(1.05);
+  border-color: #EE9FB4;
+  box-shadow: 0 4px 12px -4px rgba(226, 112, 143, 0.3);
+}
+
+.product-main-img {
+  transition: transform 0.5s ease;
+  cursor: zoom-in;
+}
+.product-main-img:hover {
+  transform: scale(1.03);
+}
+
+.whatsapp-link {
+  transition: all 0.2s ease;
+}
+.whatsapp-link:hover {
+  color: #448C50;
+  transform: translateX(2px);
+}

@@ -129,7 +129,7 @@ export default function ProductDetail() {
               <img
                 src={product.images[activeImg]}
                 alt={product.name}
-                className="h-full w-full object-cover"
+                className="product-main-img h-full w-full object-cover"
               />
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function ProductDetail() {
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
-                  className={`h-16 w-16 overflow-hidden rounded-2xl border-2 ${
+                  className={`thumb-btn h-16 w-16 overflow-hidden rounded-2xl border-2 transition-all ${
                     i === activeImg ? "border-blush-400" : "border-transparent"
                   }`}
                 >
@@ -188,7 +188,7 @@ export default function ProductDetail() {
             </div>
           )}
 
-          <div className="mt-4 flex items-baseline gap-3">
+          <div className="hover-price mt-4 flex items-baseline gap-3">
             <span className="text-3xl font-semibold">{formatPrice(product.price)}</span>
             {product.originalPrice > product.price && (
               <>
@@ -222,7 +222,7 @@ export default function ProductDetail() {
                   <button
                     key={s}
                     onClick={() => setSize(s)}
-                    className={`rounded-full border px-4 py-2 text-sm transition ${
+                    className={`size-btn rounded-full border px-4 py-2 text-sm transition ${
                       size === s
                         ? "border-blush-400 bg-blush-50 text-blush-500"
                         : "border-ink-900/10 bg-white"
@@ -256,7 +256,7 @@ export default function ProductDetail() {
             </div>
             <button
               onClick={() => wishlist.toggle(product)}
-              className={`grid h-11 w-11 place-items-center rounded-full border border-ink-900/10 bg-white ${
+              className={`grid h-11 w-11 place-items-center rounded-full border border-ink-900/10 bg-white transition-all hover:scale-110 active:scale-95 ${
                 wished ? "text-blush-500" : "text-ink-500"
               }`}
               aria-label="Wishlist"
@@ -269,14 +269,14 @@ export default function ProductDetail() {
             <button
               onClick={addToCart}
               disabled={!inStock}
-              className="rounded-full border border-ink-900/15 bg-white py-3 text-sm font-medium hover:bg-cream active:scale-95 transition-transform disabled:opacity-40"
+              className="action-btn-secondary rounded-full border border-ink-900/15 bg-white py-3 text-sm font-medium hover:bg-cream active:scale-95 transition-all disabled:opacity-40"
             >
               Add to Cart
             </button>
             <button
               onClick={buyNow}
               disabled={!inStock}
-              className="rounded-full bg-ink-900 py-3 text-sm font-medium text-white hover:bg-ink-700 active:scale-95 transition-transform disabled:opacity-40"
+              className="action-btn-primary rounded-full bg-ink-900 py-3 text-sm font-medium text-white hover:bg-ink-700 active:scale-95 transition-all disabled:opacity-40"
             >
               Buy Now
             </button>
@@ -294,7 +294,7 @@ export default function ProductDetail() {
               />
               <button
                 type="submit"
-                className="rounded-2xl bg-blush-400 px-5 text-sm font-medium text-white hover:bg-blush-500"
+                className="rounded-2xl bg-blush-400 px-5 text-sm font-medium text-white hover:bg-blush-500 transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-95"
               >
                 Check
               </button>
@@ -312,15 +312,15 @@ export default function ProductDetail() {
 
           {/* SHIPPING / RETURNS */}
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl bg-white p-3 text-center shadow-card">
+            <div className="trust-badge rounded-2xl bg-white p-3 text-center shadow-card cursor-default">
               <Truck size={18} className="mx-auto text-blush-400" />
               <p className="mt-1 text-xs text-ink-700">Fast delivery</p>
             </div>
-            <div className="rounded-2xl bg-white p-3 text-center shadow-card">
+            <div className="trust-badge rounded-2xl bg-white p-3 text-center shadow-card cursor-default">
               <RotateCcw size={18} className="mx-auto text-blush-400" />
               <p className="mt-1 text-xs text-ink-700">7-day returns</p>
             </div>
-            <div className="rounded-2xl bg-white p-3 text-center shadow-card">
+            <div className="trust-badge rounded-2xl bg-white p-3 text-center shadow-card cursor-default">
               <ShieldCheck size={18} className="mx-auto text-blush-400" />
               <p className="mt-1 text-xs text-ink-700">Secure payments</p>
             </div>
@@ -330,7 +330,7 @@ export default function ProductDetail() {
             href={whatsappLink(whatsappMessages.product(product.name))}
             target="_blank"
             rel="noreferrer"
-            className="mt-6 inline-flex items-center gap-2 text-sm text-sage-500 hover:underline"
+            className="whatsapp-link mt-6 inline-flex items-center gap-2 text-sm text-sage-500 hover:underline"
           >
             <MessageCircle size={16} /> Ask about this product on WhatsApp
           </a>
