@@ -109,7 +109,8 @@ export default function Shop() {
             </select>
           </div>
 
-                    <ProductGrid products={products} loading={loading} />
+                    <ProductGrid key={`${filters.category}-${filters.sort}-${filters.page}`}
+                    products={products} loading={loading} />
 
           {meta.pages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-3">

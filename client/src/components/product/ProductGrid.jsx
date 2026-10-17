@@ -29,14 +29,16 @@ export default function ProductGrid({
     );
   }
 
-  // Loaded state — fade in
+    // Loaded state — smooth fade-in
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 animate-[fadeIn_0.4s_ease-out]">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       {products.map((p, i) => (
         <div
           key={p._id}
-          style={{ animationDelay: `${Math.min(i * 40, 300)}ms` }}
-          className="animate-[fadeIn_0.4s_ease-out_both]"
+          style={{
+            animationDelay: `${Math.min(i * 60, 400)}ms`,
+          }}
+          className="fade-in-data opacity-0"
         >
           <ProductCard product={p} />
         </div>

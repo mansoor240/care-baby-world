@@ -1,6 +1,8 @@
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useReveal } from "./hooks/useReveal";
+import PageTransition from "./components/PageTransition";
+
 
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
@@ -60,7 +62,9 @@ function StoreLayout({ children }) {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Header />
-      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      <main className="flex-1 pb-20 md:pb-0">
+        <PageTransition>{children}</PageTransition>
+      </main>
       <Footer />
       <BottomNav />
       <WhatsAppFloat />

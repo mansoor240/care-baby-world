@@ -57,8 +57,12 @@ export default function Category() {
         </select>
       </div>
 
-      <div className="mt-6">
-        <ProductGrid products={products} loading={loading} />
+            <div className="mt-6">
+        <ProductGrid
+          key={`${slug}-${sort}-${page}`}
+          products={products}
+          loading={loading}
+        />
       </div>
 
       {meta.pages > 1 && (

@@ -6,9 +6,18 @@ export default function Footer() {
     <footer className="border-t border-ink-900/5 bg-white">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
         <div>
-          <h3 className="font-display text-lg font-bold">
+                    <Link
+            to="/"
+            onClick={(e) => {
+              if (window.location.pathname === "/") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+            className="inline-block font-display text-lg font-bold transition hover:opacity-80"
+          >
             Care<span className="text-blush-400">BabyStore</span>
-          </h3>
+          </Link>
           <p className="mt-2 text-sm text-ink-500">{storeConfig.tagline}</p>
           <p className="mt-4 text-xs text-ink-500">
             {storeConfig.address.line1}, {storeConfig.address.area}

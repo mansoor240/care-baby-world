@@ -64,7 +64,17 @@ export default function Header() {
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-        <Link to="/" className="font-display text-xl font-bold text-ink-900">
+                <Link
+          to="/"
+          onClick={(e) => {
+            // If already on home, smooth scroll to top instead of reloading
+            if (window.location.pathname === "/") {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
+          className="font-display text-xl font-bold text-ink-900 transition hover:opacity-80"
+        >
           Care<span className="text-blush-400">BabyStore</span>
         </Link>
 
