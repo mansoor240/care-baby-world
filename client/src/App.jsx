@@ -2,6 +2,8 @@ import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useReveal } from "./hooks/useReveal";
 import PageTransition from "./components/PageTransition";
+import Preloader from "./components/Preloader";
+import PageLoader from "./components/layout/PageLoader";
 
 import { ThemeProvider } from "./context/ThemeContext";
 import { CartProvider } from "./context/CartContext";
@@ -80,6 +82,8 @@ export default function App() {
   useReveal();
   return (
      <ThemeProvider>
+      <Preloader />
+      <PageLoader />
     <AuthProvider>
       <CustomerProvider>
         <CartProvider>

@@ -64,12 +64,12 @@ export default function Home() {
         className="relative overflow-hidden bg-gradient-to-b from-blush-50 via-cream to-cream dark:from-night-800 dark:via-night-900 dark:to-night-900"
       >
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-2 md:py-20">
-          <motion.div
+                    <motion.div
             style={{ y: textY }}
             initial="hidden"
             animate="show"
             variants={fadeUp}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, delay: 1.3 }}
             className="flex flex-col justify-center"
           >
             <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-blush-500 shadow-card dark:bg-night-800 dark:text-blush-300 dark:shadow-none dark:ring-1 dark:ring-white/10">
@@ -102,11 +102,11 @@ export default function Home() {
             </div>
           </motion.div>
 
-          <motion.div
+                  <motion.div
             style={{ y: imageY, scale: imageScale }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 1.5 }}
             className="relative aspect-[4/3] md:aspect-auto md:min-h-[420px]"
           >
             <Hero3D />
