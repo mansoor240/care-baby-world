@@ -9,6 +9,8 @@ import ordersRouter from "./routes/orders.js";
 import couponsRouter from "./routes/coupons.js";
 import authRouter from "./routes/auth.js";
 import adminRouter from "./routes/admin.js";
+import faqsRouter from "./routes/faqs.js";
+import adminFaqsRouter from "./routes/admin-faqs.js";
 import customersRouter from "./routes/customers.js";
 import { notFound, errorHandler } from "./middleware/error.js";
 
@@ -27,6 +29,9 @@ app.use("/api/coupons", couponsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/customers", customersRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/faqs", faqsRouter);
+app.use("/api/admin-faqs", adminFaqsRouter);
+
 
 app.use(notFound);
 app.use(errorHandler);

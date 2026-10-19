@@ -41,6 +41,8 @@ import AdminProducts from "./components/admin/AdminProducts";
 import AdminOrders from "./components/admin/AdminOrders";
 import AdminCategories from "./components/admin/AdminCategories";
 import AdminCoupons from "./components/admin/AdminCoupons";
+import AdminFAQs from "./components/admin/AdminFAQs";
+import AdminQuestions from "./components/admin/AdminQuestions";
 import AdminLayout from "./components/admin/AdminLayout";
 
 function ScrollToTop() {
@@ -96,7 +98,7 @@ export default function App() {
               <Route path="/account" element={<StoreLayout><MyAccount /></StoreLayout>} />
               <Route path="/account/orders/:id" element={<StoreLayout><OrderDetail /></StoreLayout>} />
               <Route path="/policies/:slug" element={<StoreLayout><Policies /></StoreLayout>} />
-               <Route path="/faq" element={<StoreLayout><FAQ /></StoreLayout>} />
+              <Route path="/faq" element={<StoreLayout><FAQ /></StoreLayout>} />
               <Route path="/track" element={<StoreLayout><TrackOrder /></StoreLayout>} />
               <Route path="/signup" element={<StoreLayout><Signup /></StoreLayout>} />
               <Route path="/login" element={<StoreLayout><Login /></StoreLayout>} />
@@ -116,6 +118,8 @@ export default function App() {
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="coupons" element={<AdminCoupons />} />
+                <Route path="faqs" element={<AdminFAQs />} />
+                <Route path="questions" element={<AdminQuestions />} />
               </Route>
 
               <Route path="*" element={<StoreLayout><NotFound /></StoreLayout>} />

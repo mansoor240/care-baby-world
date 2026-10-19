@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingBag, FolderTree, Ticket, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, FolderTree, Ticket, LogOut, HelpCircle, MessageSquare } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLayout() {
@@ -12,6 +12,8 @@ export default function AdminLayout() {
     { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
     { to: "/admin/categories", label: "Categories", icon: FolderTree },
     { to: "/admin/coupons", label: "Coupons", icon: Ticket },
+    { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
+    { to: "/admin/questions", label: "Questions", icon: MessageSquare },
   ];
 
   return (

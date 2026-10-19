@@ -18,8 +18,17 @@ router.get("/", async (req, res) => {
     bestseller,
   } = req.query;
 
-  const filter = {};
-  if (search) filter.$text = { $search: search };
+    const filter = {};
+
+  if (search && search.trim()) {
+    const rx = new RegExp(search.trim(), "i");
+    filter.$or = [
+      { name: rx },
+      { description: rx },
+      { brand: rx },
+      { tags: rx },
+    ];
+  }
   if (category) filter.categorySlug = category;
   if (minPrice || maxPrice) {
     filter.price = {};
