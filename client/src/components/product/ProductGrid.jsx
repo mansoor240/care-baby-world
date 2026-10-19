@@ -1,11 +1,23 @@
+import { motion } from "framer-motion";
 import ProductCard from "./ProductCard";
+
+const container = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.06 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+};
 
 export default function ProductGrid({
   products = [],
   loading = false,
   skeletonCount = 8,
 }) {
-  // Loading: show skeletons that match the real card layout
   if (loading) {
     return (
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -16,7 +28,6 @@ export default function ProductGrid({
     );
   }
 
-  // Empty state
   if (!products.length) {
     return (
       <div className="rounded-3xl bg-white p-12 text-center shadow-card">
@@ -29,40 +40,31 @@ export default function ProductGrid({
     );
   }
 
-    // Loaded state — smooth fade-in
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-      {products.map((p, i) => (
-        <div
-          key={p._id}
-          style={{
-            animationDelay: `${Math.min(i * 60, 400)}ms`,
-          }}
-          className="fade-in-data opacity-0"
-        >
+    <motion.div
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.1 }}
+      variants={container}
+      className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
+    >
+      {products.map((p) => (
+        <motion.div key={p._id} variants={item}>
           <ProductCard product={p} />
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
 function ProductSkeleton() {
   return (
     <div className="overflow-hidden rounded-3xl bg-white shadow-card">
-      {/* Image */}
       <div className="skeleton aspect-square w-full" />
-
-      {/* Card body */}
       <div className="space-y-2 p-4">
-        {/* Title — 2 lines */}
         <div className="skeleton h-3 w-full rounded-full" />
         <div className="skeleton h-3 w-2/3 rounded-full" />
-
-        {/* Price */}
         <div className="skeleton mt-3 h-4 w-1/2 rounded-full" />
-
-        {/* Rating */}
         <div className="skeleton h-3 w-1/3 rounded-full" />
       </div>
     </div>
