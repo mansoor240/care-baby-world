@@ -100,8 +100,10 @@ export default function AdminQuestions() {
         <div className="mt-6 space-y-3">
           {questions.map((q) => (
             <div key={q._id} className="rounded-3xl bg-white p-5 shadow-card">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-ink-900">{q.name}</span>
+                            <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold text-ink-900">
+                  {q.name || "Anonymous"}
+                </span>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
                     STATUS_STYLES[q.status]

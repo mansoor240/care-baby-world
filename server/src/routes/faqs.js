@@ -25,22 +25,14 @@ router.post("/ask", async (req, res) => {
   try {
     const { name, mobile, email, question } = req.body;
 
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: "Name is required" });
-    }
     if (!question || question.trim().length < 5) {
       return res
         .status(400)
         .json({ error: "Question must be at least 5 characters" });
     }
-    if (!mobile && !email) {
-      return res
-        .status(400)
-        .json({ error: "Please provide a mobile number or email" });
-    }
 
     const q = await Question.create({
-      name: name.trim(),
+      name: (name || "Anonymous").trim(),
       mobile: (mobile || "").trim(),
       email: (email || "").trim(),
       question: question.trim(),

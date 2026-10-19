@@ -45,12 +45,9 @@ export default function FAQ() {
     grouped[cat].push(f);
   });
 
-  const submitQuestion = async (e) => {
+    const submitQuestion = async (e) => {
     e.preventDefault();
 
-    if (!askForm.name.trim()) return toast.error("Please enter your name");
-    if (!askForm.mobile && !askForm.email)
-      return toast.error("Please provide a mobile number or email");
     if (askForm.question.trim().length < 5)
       return toast.error("Question must be at least 5 characters");
 
@@ -221,9 +218,9 @@ export default function FAQ() {
             <h4 className="font-display text-lg">Ask your question</h4>
 
             <div className="mt-4 space-y-3">
-              <label className="block">
+                           <label className="block">
                 <span className="mb-1.5 block text-sm font-medium text-ink-700">
-                  Your Name *
+                  Your Name <span className="text-xs font-normal text-ink-500">(optional)</span>
                 </span>
                 <input
                   type="text"
@@ -231,47 +228,52 @@ export default function FAQ() {
                   onChange={(e) =>
                     setAskForm({ ...askForm, name: e.target.value })
                   }
-                  placeholder="e.g. Priya"
+                  placeholder="e.g. Priya (or leave blank)"
                   className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm focus:border-blush-400 focus:outline-none"
                 />
               </label>
 
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-ink-700">
-                    Mobile
-                  </span>
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    value={askForm.mobile}
-                    onChange={(e) =>
-                      setAskForm({
-                        ...askForm,
-                        mobile: e.target.value.replace(/\D/g, "").slice(0, 10),
-                      })
-                    }
-                    placeholder="9876543210"
-                    className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm focus:border-blush-400 focus:outline-none"
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-ink-700">
-                    Email
-                  </span>
-                  <input
-                    type="email"
-                    value={askForm.email}
-                    onChange={(e) =>
-                      setAskForm({ ...askForm, email: e.target.value })
-                    }
-                    placeholder="you@example.com"
-                    className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm focus:border-blush-400 focus:outline-none"
-                  />
-                </label>
+                            <div className="rounded-2xl bg-cream/50 p-3">
+                <p className="text-xs text-ink-500">
+                  Optional — add contact info if you'd like a direct reply.
+                </p>
+                <div className="mt-2 grid grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="mb-1.5 block text-sm font-medium text-ink-700">
+                      Mobile
+                    </span>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      value={askForm.mobile}
+                      onChange={(e) =>
+                        setAskForm({
+                          ...askForm,
+                          mobile: e.target.value.replace(/\D/g, "").slice(0, 10),
+                        })
+                      }
+                      placeholder="9876543210"
+                      className="w-full rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm focus:border-blush-400 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1.5 block text-sm font-medium text-ink-700">
+                      Email
+                    </span>
+                    <input
+                      type="email"
+                      value={askForm.email}
+                      onChange={(e) =>
+                        setAskForm({ ...askForm, email: e.target.value })
+                      }
+                      placeholder="you@example.com"
+                      className="w-full rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm focus:border-blush-400 focus:outline-none"
+                    />
+                  </label>
+                </div>
               </div>
 
-              <label className="block">
+                            <label className="block">
                 <span className="mb-1.5 block text-sm font-medium text-ink-700">
                   Your Question *
                 </span>
