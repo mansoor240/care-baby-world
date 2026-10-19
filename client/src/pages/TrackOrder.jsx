@@ -70,18 +70,27 @@ export default function TrackOrder() {
     setError("");
   };
 
-  // ─── View single order detail ──────────────────────
+    // ─── View single order detail ──────────────────────
   if (selectedOrder) {
     const statusInfo = STATUS_INFO[selectedOrder.status];
     const StatusIcon = statusInfo?.icon;
+    const hasList = orders && orders.length > 1;
 
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <button
-          onClick={reset}
+          onClick={() => {
+            if (hasList) {
+              // If there's a list of orders, go back to list
+              setSelectedOrder(null);
+            } else {
+              // Otherwise, go back to search
+              reset();
+            }
+          }}
           className="mb-4 inline-flex items-center gap-1 text-sm text-blush-500 hover:underline"
         >
-          ← Back to search
+          ← {hasList ? "Back to orders" : "Back to search"}
         </button>
 
         <div className="space-y-6">
