@@ -3,8 +3,6 @@ import toast from "react-hot-toast";
 import api from "../../api/client";
 import { formatPrice, formatDate } from "../../lib/format";
 import { Trash2 } from "lucide-react";
-import { whatsappLink } from "../../lib/whatsapp";
-import { MessageCircle } from "lucide-react";
 
 const STATUSES = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
 
@@ -15,12 +13,6 @@ export default function AdminOrders() {
   const load = () => api.get("/admin/orders").then((r) => setOrders(r.data));
   useEffect(() => { load(); }, []);
 
-  const updateStatus = async (id, status) => {
-    await api.put(`/admin/orders/${id}/status`, { status });
-    toast.success("Status updated");
-    load();
-    if (selected?._id === id) setSelected({ ...selected, status });
-  };
   const updateStatus = async (id, status) => {
     await api.put(`/admin/orders/${id}/status`, { status });
     toast.success("Status updated");
@@ -49,6 +41,7 @@ export default function AdminOrders() {
       toast.error(err.response?.data?.error || "Could not delete");
     }
   };
+
   return (
     <div>
       <h1 className="font-display text-2xl">Orders</h1>
@@ -88,7 +81,7 @@ export default function AdminOrders() {
                     {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </td>
-                                <td className="p-3 text-right">
+                <td className="p-3 text-right">
                   <button
                     onClick={() => setSelected(o)}
                     className="text-blush-500 text-xs hover:underline"
@@ -116,7 +109,7 @@ export default function AdminOrders() {
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4" onClick={() => setSelected(null)}>
           <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <h2 className="font-display text-xl">{selected.orderNumber}</h2>
               <button onClick={() => setSelected(null)}>✕</button>
             </div>
@@ -134,6 +127,7 @@ export default function AdminOrders() {
                 </button>
               </div>
             )}
+
             <div className="mt-4 text-sm">
               <div className="font-semibold">{selected.customer.fullName}</div>
               <div className="text-ink-500">{selected.customer.mobile}</div>
@@ -159,16 +153,6 @@ export default function AdminOrders() {
               <div className="flex justify-between"><span>Delivery</span><span>{selected.deliveryFee === 0 ? "Free" : formatPrice(selected.deliveryFee)}</span></div>
               <div className="flex justify-between font-semibold"><span>Total</span><span>{formatPrice(selected.total)}</span></div>
             </div>
-             <a
-              href={whatsappLink(
-                `Hi ${selected.customer.fullName}! Your order ${selected.orderNumber} is now ${selected.status}. Thank you for shopping with Care Baby World!`
-              )}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-sage-500 py-2.5 text-sm font-medium text-white hover:bg-sage-400"
-            >
-              <MessageCircle size={16} /> Notify Customer on WhatsApp
-            </a>
           </div>
         </div>
       )}
