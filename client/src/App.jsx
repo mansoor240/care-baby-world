@@ -27,6 +27,7 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import Policies from "./pages/Policies";
+import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
@@ -95,6 +96,7 @@ export default function App() {
               <Route path="/account" element={<StoreLayout><MyAccount /></StoreLayout>} />
               <Route path="/account/orders/:id" element={<StoreLayout><OrderDetail /></StoreLayout>} />
               <Route path="/policies/:slug" element={<StoreLayout><Policies /></StoreLayout>} />
+               <Route path="/faq" element={<StoreLayout><FAQ /></StoreLayout>} />
               <Route path="/track" element={<StoreLayout><TrackOrder /></StoreLayout>} />
               <Route path="/signup" element={<StoreLayout><Signup /></StoreLayout>} />
               <Route path="/login" element={<StoreLayout><Login /></StoreLayout>} />
