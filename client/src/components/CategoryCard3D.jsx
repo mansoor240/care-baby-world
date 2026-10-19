@@ -35,16 +35,29 @@ export default function CategoryCard3D({ category, index }) {
             rotateY,
             transformStyle: "preserve-3d",
           }}
-          className="group rounded-3xl bg-white p-4 text-center shadow-card transition-shadow duration-300 hover:shadow-soft"
+          className="group rounded-3xl bg-white p-4 text-center shadow-card transition-shadow duration-300 hover:shadow-soft dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5"
         >
+          {/* Rotating emoji/icon */}
           <div
-            className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blush-50 text-2xl transition-transform duration-300 group-hover:scale-110"
+            className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blush-50 transition-transform duration-300 group-hover:scale-110 dark:bg-blush-400/15"
             style={{ transform: "translateZ(30px)" }}
           >
-            {category.emoji || "🧸"}
+            <motion.span
+              animate={{ rotate: [0, 360] }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: "linear",
+                delay: index * 0.2,
+              }}
+              className="text-2xl select-none"
+              aria-hidden="true"
+            >
+              {category.emoji || "🧸"}
+            </motion.span>
           </div>
           <div
-            className="mt-3 text-sm font-medium text-ink-900 transition-colors group-hover:text-blush-500"
+            className="mt-3 text-sm font-medium text-ink-900 transition-colors group-hover:text-blush-500 dark:text-night-50 dark:group-hover:text-blush-300"
             style={{ transform: "translateZ(20px)" }}
           >
             {category.name}

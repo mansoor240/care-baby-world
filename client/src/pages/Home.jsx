@@ -7,6 +7,9 @@ import CategoryCard3D from "../components/CategoryCard3D";
 import MagneticButton from "../components/MagneticButton";
 import AnimatedCounter from "../components/AnimatedCounter";
 import Hero3D from "../components/Hero3D";
+import ScrollShowcase from "../components/ScrollShowcase";
+import ScrollRevealText from "../components/ScrollRevealText";
+import HorizontalScroll from "../components/HorizontalScroll";
 import { storeConfig } from "../config/store";
 import { whatsappLink, whatsappMessages } from "../lib/whatsapp";
 import { MessageCircle, Truck, ShieldCheck, RotateCcw, HeartHandshake, Star } from "lucide-react";
@@ -41,6 +44,16 @@ export default function Home() {
   const textY = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const imageY = useTransform(scrollYProgress, [0, 1], [0, -80]);
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
+  // NEW: Hero image rotates as you scroll
+  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 8]);
+
+  const featuredRef = useRef(null);
+  const featuredScroll = useScroll({
+    target: featuredRef,
+    offset: ["start end", "end start"],
+  });
+  const featuredY = useTransform(featuredScroll.scrollYProgress, [0, 1], [50, -50]);
+  const featuredScale = useTransform(featuredScroll.scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
 
   useEffect(() => {
     Promise.all([
@@ -58,18 +71,21 @@ export default function Home() {
 
   return (
     <div>
+      {/* ─── SCROLL SHOWCASE (top) ─────────────────────── */}
+      <ScrollShowcase />
+
       {/* ─── HERO ──────────────────────────────────── */}
       <section
         ref={heroRef}
         className="relative overflow-hidden bg-gradient-to-b from-blush-50 via-cream to-cream dark:from-night-800 dark:via-night-900 dark:to-night-900"
       >
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-2 md:py-20">
-                    <motion.div
+          <motion.div
             style={{ y: textY }}
             initial="hidden"
             animate="show"
             variants={fadeUp}
-            transition={{ duration: 0.8, delay: 1.3 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col justify-center"
           >
             <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-blush-500 shadow-card dark:bg-night-800 dark:text-blush-300 dark:shadow-none dark:ring-1 dark:ring-white/10">
@@ -102,11 +118,16 @@ export default function Home() {
             </div>
           </motion.div>
 
-                  <motion.div
-            style={{ y: imageY, scale: imageScale }}
+          {/* Hero image with rotation on scroll */}
+          <motion.div
+            style={{
+              y: imageY,
+              scale: imageScale,
+              rotate: imageRotate,
+            }}
             initial={{ opacity: 0, x: 60 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 1.5 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
             className="relative aspect-[4/3] md:aspect-auto md:min-h-[420px]"
           >
             <Hero3D />
@@ -114,7 +135,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── CATEGORIES ─────────────────────────────── */}
+      {/* ─── CATEGORIES (rotating icons) ─────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-12">
         <motion.div
           initial="hidden"
@@ -142,9 +163,10 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ─── FEATURED ───────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
+      {/* ─── FEATURED (with parallax) ─────────────────── */}
+      <section ref={featuredRef} className="mx-auto max-w-7xl px-4 py-8">
         <motion.div
+          style={{ y: featuredY }}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.3 }}
@@ -155,6 +177,7 @@ export default function Home() {
           <Link to="/shop" className="text-sm text-blush-500 hover:underline dark:text-blush-300">See all →</Link>
         </motion.div>
         <motion.div
+          style={{ scale: featuredScale }}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -163,6 +186,13 @@ export default function Home() {
           <ProductGrid products={featured} loading={loading} />
         </motion.div>
       </section>
+
+      {/* ─── HORIZONTAL SCROLL BESTSELLERS ────────────── */}
+      <HorizontalScroll
+        products={bestsellers}
+        title="Best Sellers"
+        subtitle="Loved by parents"
+      />
 
       {/* ─── OFFER BANNER ───────────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-8">
@@ -201,38 +231,14 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ─── BESTSELLERS ────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={fadeUp}
-          className="mb-6"
-        >
-          <h2 className="font-display text-2xl text-ink-900 dark:text-night-50">Best Sellers</h2>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          <ProductGrid products={bestsellers} loading={loading} />
-        </motion.div>
-      </section>
-
       {/* ─── WHY US ─────────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-12">
-        <motion.h2
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={fadeUp}
-          className="mb-8 text-center font-display text-2xl text-ink-900 dark:text-night-50"
-        >
-          Why Shop With Us
-        </motion.h2>
+        <div className="mb-8 text-center">
+          <ScrollRevealText
+            text="Why Shop With Us"
+            className="justify-center font-display text-2xl text-ink-900 dark:text-night-50"
+          />
+        </div>
         <motion.div
           initial="hidden"
           whileInView="show"
