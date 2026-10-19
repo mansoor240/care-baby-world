@@ -44,15 +44,45 @@ export default function OrderConfirmation() {
         <p className="mt-1 text-sm text-ink-700">
           Your order has been placed successfully.
         </p>
-        <p className="mt-3 rounded-full bg-white px-4 py-1.5 text-sm font-semibold">
-          Order # {order.orderNumber}
-        </p>
-        <p className="mt-4 text-xs text-ink-700">
-          📌 Save your order number. Track anytime at{" "}
-          <Link to="/track" className="font-medium text-blush-500 underline">
-            /track
+                <div className="mt-3 space-y-2">
+          <p className="rounded-full bg-white px-4 py-2 text-base font-bold text-ink-900">
+            Order # {order.orderNumber}
+          </p>
+          <p className="text-xs text-ink-700">
+            📌 <strong>Save this order number</strong> to track your order anytime.
+          </p>
+        </div>
+
+        {/* Action buttons */}
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <Link
+            to="/track"
+            className="rounded-full bg-ink-900 px-5 py-2.5 text-xs font-medium text-white hover:bg-ink-700 transition"
+          >
+            Track this order
           </Link>
-        </p>
+          <button
+            type="button"
+            onClick={() => {
+              const message = `My order from CareBabyStore:\n\nOrder #: ${order.orderNumber}\nTotal: ₹${order.total}\nStatus: ${order.status}\n\nTrack: https://care-baby-world.vercel.app/track`;
+              navigator.clipboard.writeText(message);
+              alert("Order details copied! Save this in your notes or WhatsApp yourself.");
+            }}
+            className="rounded-full border border-ink-900/15 bg-white px-5 py-2.5 text-xs font-medium text-ink-900 hover:bg-cream transition"
+          >
+            📋 Copy details
+          </button>
+          <a
+            href={whatsappLink(
+              `Hi! I just placed order ${order.orderNumber} on CareBabyStore. Total: ₹${order.total}. Can you confirm my order?`
+            )}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full bg-sage-500 px-5 py-2.5 text-xs font-medium text-white hover:bg-sage-400 transition"
+          >
+            💬 Save on WhatsApp
+          </a>
+        </div>
       </div>
 
       {/* Order Details */}

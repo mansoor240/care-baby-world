@@ -227,23 +227,40 @@ router.post("/verify-payment", async (req, res) => {
 });
 
 // GET /api/orders/track?orderNumber=TN-XXX&mobile=9876543210
+// OR just mobile (returns recent orders for that number)
 router.get("/track", async (req, res) => {
   const { orderNumber, mobile } = req.query;
 
-  if (!orderNumber || !mobile) {
-    return res.status(400).json({ error: "Order number and mobile required" });
+  if (!mobile) {
+    return res.status(400).json({ error: "Mobile number required" });
   }
 
-  const order = await Order.findOne({
-    orderNumber: orderNumber.trim(),
-    "customer.mobile": mobile.trim(),
-  });
+  // If orderNumber provided → find that specific order
+  if (orderNumber) {
+    const order = await Order.findOne({
+      orderNumber: orderNumber.trim().toUpperCase(),
+      "customer.mobile": mobile.trim(),
+    });
 
-  if (!order) {
-    return res.status(404).json({ error: "No order found with these details" });
+    if (!order) {
+      return res.status(404).json({ error: "No order found with these details" });
+    }
+
+    return res.json({ orders: [order], single: true });
   }
 
-  res.json(order);
+  // If only mobile → return recent orders for that number
+  const orders = await Order.find({ "customer.mobile": mobile.trim() })
+    .sort({ createdAt: -1 })
+    .limit(10);
+
+  if (orders.length === 0) {
+    return res.status(404).json({
+      error: "No orders found for this mobile number. Check the number and try again.",
+    });
+  }
+
+  res.json({ orders, single: false });
 });
 
 // GET /api/orders/by-id/:id
