@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import api from "../api/client";
 import ProductGrid from "../components/product/ProductGrid";
+import CategoryCard3D from "../components/CategoryCard3D";
+import MagneticButton from "../components/MagneticButton";
+import AnimatedCounter from "../components/AnimatedCounter";
 import Hero3D from "../components/Hero3D";
 import { storeConfig } from "../config/store";
 import { whatsappLink, whatsappMessages } from "../lib/whatsapp";
@@ -31,6 +34,18 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Parallax scroll for hero
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  const textY = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
   useEffect(() => {
     Promise.all([
       api.get("/products", { params: { featured: true, limit: 8 } }),
@@ -47,11 +62,15 @@ export default function Home() {
 
   return (
     <div>
-      {/* ─── HERO with 3D animation ────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-blush-50 via-cream to-cream">
+           {/* ─── HERO with 3D animation ────────────────── */}
+      <section
+        ref={heroRef}
+        className="relative overflow-hidden bg-gradient-to-b from-blush-50 via-cream to-cream"
+      >
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-2 md:py-20">
-          {/* Left: Text */}
+          {/* Left: Text with parallax */}
           <motion.div
+            style={{ y: textY }}
             initial="hidden"
             animate="show"
             variants={fadeUp}
@@ -59,7 +78,11 @@ export default function Home() {
             className="flex flex-col justify-center"
           >
             <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-blush-500 shadow-card">
-              <Star size={12} fill="currentColor" /> Trusted by local families
+              <Star size={12} fill="currentColor" /> Trusted by{" "}
+              <strong className="text-blush-500">
+                <AnimatedCounter end={500} suffix="+" />
+              </strong>{" "}
+              families
             </span>
             <h1 className="mt-4 font-display text-4xl leading-tight text-ink-900 sm:text-5xl">
               Everything Your <span className="text-blush-400">Little One</span> Needs
@@ -67,24 +90,26 @@ export default function Home() {
             <p className="mt-4 max-w-md text-ink-500">
               Baby essentials, clothing, toys and care products — all in one place. Delivered to your doorstep.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
+                        <div className="mt-6 flex flex-wrap gap-3">
+              <MagneticButton
                 to="/shop"
-                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-all hover:shadow-soft hover:-translate-y-0.5 active:scale-95"
+                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-colors"
               >
                 Shop Now
-              </Link>
-              <Link
+              </MagneticButton>
+              <MagneticButton
                 to="/shop"
-                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-all hover:shadow-card hover:-translate-y-0.5 active:scale-95"
+                strength={20}
+                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-colors"
               >
                 Explore Categories
-              </Link>
+              </MagneticButton>
             </div>
           </motion.div>
 
-          {/* Right: 3D animated scene */}
+                    {/* Right: 3D animated scene with parallax */}
           <motion.div
+            style={{ y: imageY, scale: imageScale }}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -108,26 +133,16 @@ export default function Home() {
           <Link to="/shop" className="text-sm text-blush-500 hover:underline">View all →</Link>
         </motion.div>
 
-        <motion.div
+                <motion.div
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
           variants={staggerContainer}
           className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
         >
-          {categories.map((c) => (
+          {categories.map((c, i) => (
             <motion.div key={c.slug} variants={staggerItem}>
-              <Link
-                to={`/category/${c.slug}`}
-                className="group block rounded-3xl bg-white p-4 text-center shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft hover:scale-[1.03]"
-              >
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blush-50 text-2xl transition-transform duration-300 group-hover:scale-110">
-                  {c.emoji || "🧸"}
-                </div>
-                <div className="mt-3 text-sm font-medium text-ink-900 transition-colors group-hover:text-blush-500">
-                  {c.name}
-                </div>
-              </Link>
+              <CategoryCard3D category={c} index={i} />
             </motion.div>
           ))}
         </motion.div>

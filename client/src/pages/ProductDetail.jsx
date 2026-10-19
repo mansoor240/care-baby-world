@@ -9,6 +9,7 @@ import { whatsappLink, whatsappMessages } from "../lib/whatsapp";
 import ProductGrid from "../components/product/ProductGrid";
 import { Heart, Truck, RotateCcw, ShieldCheck, MessageCircle } from "lucide-react";
 import { storeConfig } from "../config/store";
+import ImageLightbox from "../components/ImageLightbox";
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -16,6 +17,7 @@ export default function ProductDetail() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
   const [qty, setQty] = useState(1);
   const [size, setSize] = useState("");
   const [pincode, setPincode] = useState("");
@@ -126,11 +128,17 @@ export default function ProductDetail() {
         <div>
           <div className="overflow-hidden rounded-4xl bg-white shadow-card">
             <div className="aspect-square bg-cream">
-              <img
-                src={product.images[activeImg]}
-                alt={product.name}
-                className="product-main-img h-full w-full object-cover"
-              />
+                           <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                className="block h-full w-full cursor-zoom-in"
+              >
+                <img
+                  src={product.images[activeImg]}
+                  alt={product.name}
+                  className="product-main-img h-full w-full object-cover"
+                />
+              </button>
             </div>
           </div>
           {product.images.length > 1 && (
@@ -337,11 +345,20 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {related?.length > 0 && (
+            {related?.length > 0 && (
         <section className="mt-16">
           <h2 className="mb-6 font-display text-2xl">You may also like</h2>
           <ProductGrid products={related} />
         </section>
+      )}
+
+      {lightboxOpen && (
+        <ImageLightbox
+          images={product.images}
+          activeIndex={activeImg}
+          onClose={() => setLightboxOpen(false)}
+          onChange={setActiveImg}
+        />
       )}
     </div>
   );

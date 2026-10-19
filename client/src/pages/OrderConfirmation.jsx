@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import confetti from "canvas-confetti";
 import api from "../api/client";
 import { formatPrice, formatDate } from "../lib/format";
 import { whatsappLink, whatsappMessages } from "../lib/whatsapp";
@@ -18,6 +19,38 @@ export default function OrderConfirmation() {
       .catch(() => setOrder(null))
       .finally(() => setLoading(false));
   }, [orderNumber]);
+
+  // 🎉 Confetti on successful order load
+  useEffect(() => {
+    if (!order) return;
+
+    const duration = 2000;
+    const end = Date.now() + duration;
+    const colors = ["#E2708F", "#93C4E4", "#97C79F", "#BFB2E3", "#D5BE92"];
+
+    const frame = () => {
+      confetti({
+        particleCount: 3,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors,
+      });
+      confetti({
+        particleCount: 3,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors,
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+
+    frame();
+  }, [order]);
 
   if (loading)
     return (
@@ -44,12 +77,14 @@ export default function OrderConfirmation() {
         <p className="mt-1 text-sm text-ink-700">
           Your order has been placed successfully.
         </p>
-                <div className="mt-3 space-y-2">
+
+        <div className="mt-3 space-y-2">
           <p className="rounded-full bg-white px-4 py-2 text-base font-bold text-ink-900">
             Order # {order.orderNumber}
           </p>
           <p className="text-xs text-ink-700">
-            📌 <strong>Save this order number</strong> to track your order anytime.
+            📌 <strong>Save this order number</strong> to track your order
+            anytime.
           </p>
         </div>
 
@@ -66,7 +101,9 @@ export default function OrderConfirmation() {
             onClick={() => {
               const message = `My order from CareBabyStore:\n\nOrder #: ${order.orderNumber}\nTotal: ₹${order.total}\nStatus: ${order.status}\n\nTrack: https://care-baby-world.vercel.app/track`;
               navigator.clipboard.writeText(message);
-              alert("Order details copied! Save this in your notes or WhatsApp yourself.");
+              alert(
+                "Order details copied! Save this in your notes or WhatsApp yourself."
+              );
             }}
             className="rounded-full border border-ink-900/15 bg-white px-5 py-2.5 text-xs font-medium text-ink-900 hover:bg-cream transition"
           >
