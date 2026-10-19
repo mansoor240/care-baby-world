@@ -13,6 +13,21 @@ body {
   background: #FDFBF7;
   color: #1F1B24;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark body {
+  background: #17171D;
+  color: #F7F7F9;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2F2F36;
+}
+
+html.dark .skeleton {
+  background: linear-gradient(90deg, #1F1F24 0%, #2F2F36 50%, #1F1F24 100%);
+  background-size: 200% 100%;
 }
 
 .font-display { font-family: var(--font-display); }

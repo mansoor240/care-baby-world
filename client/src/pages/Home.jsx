@@ -18,9 +18,7 @@ const fadeUp = {
 
 const staggerContainer = {
   hidden: {},
-  show: {
-    transition: { staggerChildren: 0.08 },
-  },
+  show: { transition: { staggerChildren: 0.08 } },
 };
 
 const staggerItem = {
@@ -34,7 +32,6 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Parallax scroll for hero
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -44,7 +41,6 @@ export default function Home() {
   const textY = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const imageY = useTransform(scrollYProgress, [0, 1], [0, -80]);
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   useEffect(() => {
     Promise.all([
@@ -62,13 +58,12 @@ export default function Home() {
 
   return (
     <div>
-           {/* ─── HERO with 3D animation ────────────────── */}
+      {/* ─── HERO ──────────────────────────────────── */}
       <section
         ref={heroRef}
-        className="relative overflow-hidden bg-gradient-to-b from-blush-50 via-cream to-cream"
+        className="relative overflow-hidden bg-gradient-to-b from-blush-50 via-cream to-cream dark:from-night-800 dark:via-night-900 dark:to-night-900"
       >
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-2 md:py-20">
-          {/* Left: Text with parallax */}
           <motion.div
             style={{ y: textY }}
             initial="hidden"
@@ -77,37 +72,36 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="flex flex-col justify-center"
           >
-            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-blush-500 shadow-card">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-blush-500 shadow-card dark:bg-night-800 dark:text-blush-300 dark:shadow-none dark:ring-1 dark:ring-white/10">
               <Star size={12} fill="currentColor" /> Trusted by{" "}
-              <strong className="text-blush-500">
+              <strong className="text-blush-500 dark:text-blush-300">
                 <AnimatedCounter end={500} suffix="+" />
               </strong>{" "}
               families
             </span>
-            <h1 className="mt-4 font-display text-4xl leading-tight text-ink-900 sm:text-5xl">
-              Everything Your <span className="text-blush-400">Little One</span> Needs
+            <h1 className="mt-4 font-display text-4xl leading-tight text-ink-900 sm:text-5xl dark:text-night-50">
+              Everything Your <span className="text-blush-400 dark:text-blush-300">Little One</span> Needs
             </h1>
-            <p className="mt-4 max-w-md text-ink-500">
+            <p className="mt-4 max-w-md text-ink-500 dark:text-night-300">
               Baby essentials, clothing, toys and care products — all in one place. Delivered to your doorstep.
             </p>
-                        <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <MagneticButton
                 to="/shop"
-                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-colors"
+                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-colors dark:bg-blush-500 dark:hover:bg-blush-400"
               >
                 Shop Now
               </MagneticButton>
               <MagneticButton
                 to="/shop"
                 strength={20}
-                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-colors"
+                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-colors dark:border-white/15 dark:bg-night-800 dark:text-night-50 dark:hover:bg-night-700"
               >
                 Explore Categories
               </MagneticButton>
             </div>
           </motion.div>
 
-                    {/* Right: 3D animated scene with parallax */}
           <motion.div
             style={{ y: imageY, scale: imageScale }}
             initial={{ opacity: 0, scale: 0.95 }}
@@ -129,11 +123,11 @@ export default function Home() {
           variants={fadeUp}
           className="mb-6 flex items-end justify-between"
         >
-          <h2 className="font-display text-2xl text-ink-900">Shop by Category</h2>
-          <Link to="/shop" className="text-sm text-blush-500 hover:underline">View all →</Link>
+          <h2 className="font-display text-2xl text-ink-900 dark:text-night-50">Shop by Category</h2>
+          <Link to="/shop" className="text-sm text-blush-500 hover:underline dark:text-blush-300">View all →</Link>
         </motion.div>
 
-                <motion.div
+        <motion.div
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
@@ -157,8 +151,8 @@ export default function Home() {
           variants={fadeUp}
           className="mb-6 flex items-end justify-between"
         >
-          <h2 className="font-display text-2xl text-ink-900">Featured Products</h2>
-          <Link to="/shop" className="text-sm text-blush-500 hover:underline">See all →</Link>
+          <h2 className="font-display text-2xl text-ink-900 dark:text-night-50">Featured Products</h2>
+          <Link to="/shop" className="text-sm text-blush-500 hover:underline dark:text-blush-300">See all →</Link>
         </motion.div>
         <motion.div
           initial={{ opacity: 0 }}
@@ -177,29 +171,29 @@ export default function Home() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="overflow-hidden rounded-4xl bg-gradient-to-r from-lavender-100 via-blush-100 to-sand-100 p-8 md:p-12"
+          className="overflow-hidden rounded-4xl bg-gradient-to-r from-lavender-100 via-blush-100 to-sand-100 p-8 md:p-12 dark:from-night-700 dark:via-night-800 dark:to-night-700"
         >
           <div className="grid gap-6 md:grid-cols-2 md:items-center">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-blush-500">
+              <div className="text-xs font-semibold uppercase tracking-wider text-blush-500 dark:text-blush-300">
                 Limited Time
               </div>
-              <h3 className="mt-2 font-display text-3xl text-ink-900">
-                Use code <span className="text-blush-500">WELCOME10</span>
+              <h3 className="mt-2 font-display text-3xl text-ink-900 dark:text-night-50">
+                Use code <span className="text-blush-500 dark:text-blush-300">WELCOME10</span>
               </h3>
-              <p className="mt-2 text-ink-500">
+              <p className="mt-2 text-ink-500 dark:text-night-300">
                 Get 10% off your first order above ₹499. Applicable at checkout.
               </p>
               <Link
                 to="/shop"
-                className="mt-5 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-all hover:shadow-soft hover:-translate-y-0.5 active:scale-95"
+                className="mt-5 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-all hover:shadow-soft hover:-translate-y-0.5 active:scale-95 dark:bg-blush-500 dark:hover:bg-blush-400"
               >
                 Shop the offer
               </Link>
             </div>
-            <div className="rounded-3xl bg-white/70 p-6 text-center backdrop-blur transition-transform duration-500 hover:scale-105">
+            <div className="rounded-3xl bg-white/70 p-6 text-center backdrop-blur transition-transform duration-500 hover:scale-105 dark:bg-night-800/70">
               <div className="text-6xl">🎁</div>
-              <p className="mt-3 text-sm text-ink-700">
+              <p className="mt-3 text-sm text-ink-700 dark:text-night-100">
                 Free delivery on orders above {storeConfig.currency}{storeConfig.freeDeliveryThreshold}
               </p>
             </div>
@@ -216,7 +210,7 @@ export default function Home() {
           variants={fadeUp}
           className="mb-6"
         >
-          <h2 className="font-display text-2xl text-ink-900">Best Sellers</h2>
+          <h2 className="font-display text-2xl text-ink-900 dark:text-night-50">Best Sellers</h2>
         </motion.div>
         <motion.div
           initial={{ opacity: 0 }}
@@ -235,7 +229,7 @@ export default function Home() {
           whileInView="show"
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
-          className="mb-8 text-center font-display text-2xl text-ink-900"
+          className="mb-8 text-center font-display text-2xl text-ink-900 dark:text-night-50"
         >
           Why Shop With Us
         </motion.h2>
@@ -256,13 +250,15 @@ export default function Home() {
             <motion.div
               key={f.title}
               variants={staggerItem}
-              className="group rounded-3xl bg-white p-5 text-center shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft"
+              className="group rounded-3xl bg-white p-5 text-center shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5"
             >
-              <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-blush-50 text-blush-500 transition-all duration-300 group-hover:scale-110 group-hover:bg-blush-100">
+              <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-blush-50 text-blush-500 transition-all duration-300 group-hover:scale-110 group-hover:bg-blush-100 dark:bg-blush-400/15 dark:text-blush-300 dark:group-hover:bg-blush-400/25">
                 <f.icon size={20} />
               </div>
-              <div className="mt-3 text-sm font-semibold text-ink-900 transition-colors group-hover:text-blush-500">{f.title}</div>
-              <div className="mt-1 text-xs text-ink-500">{f.text}</div>
+              <div className="mt-3 text-sm font-semibold text-ink-900 transition-colors group-hover:text-blush-500 dark:text-night-50 dark:group-hover:text-blush-300">
+                {f.title}
+              </div>
+              <div className="mt-1 text-xs text-ink-500 dark:text-night-300">{f.text}</div>
             </motion.div>
           ))}
         </motion.div>
@@ -275,7 +271,7 @@ export default function Home() {
           whileInView="show"
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
-          className="mb-8 text-center font-display text-2xl text-ink-900"
+          className="mb-8 text-center font-display text-2xl text-ink-900 dark:text-night-50"
         >
           What Parents Say
         </motion.h2>
@@ -294,11 +290,13 @@ export default function Home() {
             <motion.blockquote
               key={r.name}
               variants={staggerItem}
-              className="group rounded-3xl bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft"
+              className="group rounded-3xl bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-soft dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5"
             >
-              <div className="text-blush-400 transition-transform duration-300 group-hover:scale-105">★★★★★</div>
-              <p className="mt-3 text-sm text-ink-700">"{r.text}"</p>
-              <footer className="mt-3 text-xs text-ink-500">— {r.name}</footer>
+              <div className="text-blush-400 transition-transform duration-300 group-hover:scale-105 dark:text-blush-300">
+                ★★★★★
+              </div>
+              <p className="mt-3 text-sm text-ink-700 dark:text-night-100">"{r.text}"</p>
+              <footer className="mt-3 text-xs text-ink-500 dark:text-night-400">— {r.name}</footer>
             </motion.blockquote>
           ))}
         </motion.div>
@@ -311,15 +309,17 @@ export default function Home() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="rounded-4xl bg-sage-50 p-8 text-center md:p-12"
+          className="rounded-4xl bg-sage-50 p-8 text-center md:p-12 dark:bg-night-800 dark:ring-1 dark:ring-white/5"
         >
-          <h3 className="font-display text-2xl text-ink-900">Need help choosing?</h3>
-          <p className="mt-2 text-ink-500">Chat with our team on WhatsApp for recommendations.</p>
+          <h3 className="font-display text-2xl text-ink-900 dark:text-night-50">Need help choosing?</h3>
+          <p className="mt-2 text-ink-500 dark:text-night-300">
+            Chat with our team on WhatsApp for recommendations.
+          </p>
           <a
             href={whatsappLink(whatsappMessages.general)}
             target="_blank"
             rel="noreferrer"
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-sage-500 px-6 py-3 text-sm font-medium text-white hover:bg-sage-400 transition-all hover:shadow-soft hover:-translate-y-0.5 active:scale-95"
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-sage-500 px-6 py-3 text-sm font-medium text-white hover:bg-sage-400 transition-all hover:shadow-soft hover:-translate-y-0.5 active:scale-95 dark:bg-sage-500"
           >
             <MessageCircle size={16} /> Chat on WhatsApp
           </a>

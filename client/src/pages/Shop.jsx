@@ -48,15 +48,10 @@ export default function Shop() {
         if (cancelled) return;
         const elapsed = Date.now() - startedAt;
         const wait = Math.max(0, 300 - elapsed);
-
         setTimeout(() => {
           if (cancelled) return;
           setProducts(r.data.items);
-          setMeta({
-            total: r.data.total,
-            page: r.data.page,
-            pages: r.data.pages,
-          });
+          setMeta({ total: r.data.total, page: r.data.page, pages: r.data.pages });
           setLoading(false);
         }, wait);
       })
@@ -64,9 +59,7 @@ export default function Shop() {
         if (!cancelled) setLoading(false);
       });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [filters]);
 
   const update = (patch) => {
@@ -84,16 +77,14 @@ export default function Shop() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <nav className="mb-3 text-xs text-ink-500">
-        <Link to="/" className="hover:text-ink-900 transition">
-          Home
-        </Link>
+      <nav className="mb-3 text-xs text-ink-500 dark:text-night-400">
+        <Link to="/" className="hover:text-ink-900 transition dark:hover:text-night-50">Home</Link>
         <span className="mx-1.5">/</span>
-        <span className="text-ink-900">Shop</span>
+        <span className="text-ink-900 dark:text-night-50">Shop</span>
       </nav>
 
-      <h1 className="font-display text-3xl text-ink-900">Shop All Products</h1>
-      <p className="mt-1 text-sm text-ink-500">{meta.total} products</p>
+      <h1 className="font-display text-3xl text-ink-900 dark:text-night-50">Shop All Products</h1>
+      <p className="mt-1 text-sm text-ink-500 dark:text-night-300">{meta.total} products</p>
 
       <div className="mt-6 grid gap-6 md:grid-cols-[260px_1fr]">
         <aside>
@@ -102,13 +93,13 @@ export default function Shop() {
 
         <section>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="text-sm text-ink-500">
+            <div className="text-sm text-ink-500 dark:text-night-300">
               Showing page {meta.page} of {meta.pages || 1}
             </div>
             <select
               value={filters.sort}
               onChange={(e) => update({ sort: e.target.value })}
-              className="rounded-full border border-ink-900/10 bg-white px-3 py-2 text-sm"
+              className="rounded-full border border-ink-900/10 bg-white px-3 py-2 text-sm text-ink-900 dark:border-white/10 dark:bg-night-800 dark:text-night-50"
             >
               <option value="popular">Popular</option>
               <option value="newest">Newest</option>
@@ -118,24 +109,24 @@ export default function Shop() {
           </div>
 
           {!loading && products.length === 0 ? (
-            <div className="rounded-3xl bg-white p-12 text-center shadow-card animate-[fadeIn_0.4s_ease-out]">
-              <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl">
+            <div className="rounded-3xl bg-white p-12 text-center shadow-card dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5">
+              <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl dark:bg-blush-400/15">
                 🔍
               </div>
-              <h3 className="mt-6 font-display text-2xl">No products match</h3>
-              <p className="mt-2 text-sm text-ink-500">
+              <h3 className="mt-6 font-display text-2xl text-ink-900 dark:text-night-50">No products match</h3>
+              <p className="mt-2 text-sm text-ink-500 dark:text-night-300">
                 Try adjusting your filters or search again.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <button
                   onClick={() => setParams(new URLSearchParams())}
-                  className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
+                  className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95 dark:bg-blush-500 dark:hover:bg-blush-400"
                 >
                   Clear all filters
                 </button>
                 <Link
                   to="/shop"
-                  className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-transform active:scale-95"
+                  className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-transform active:scale-95 dark:border-white/15 dark:bg-night-800 dark:text-night-50 dark:hover:bg-night-700"
                 >
                   View all products
                 </Link>
@@ -154,17 +145,17 @@ export default function Shop() {
               <button
                 disabled={meta.page <= 1}
                 onClick={prevPage}
-                className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm disabled:opacity-40"
+                className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm text-ink-900 disabled:opacity-40 dark:border-white/10 dark:bg-night-800 dark:text-night-50"
               >
                 ← Prev
               </button>
-              <span className="text-sm text-ink-500">
+              <span className="text-sm text-ink-500 dark:text-night-300">
                 {meta.page} / {meta.pages}
               </span>
               <button
                 disabled={meta.page >= meta.pages}
                 onClick={nextPage}
-                className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm disabled:opacity-40"
+                className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm text-ink-900 disabled:opacity-40 dark:border-white/10 dark:bg-night-800 dark:text-night-50"
               >
                 Next →
               </button>

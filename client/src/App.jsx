@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useReveal } from "./hooks/useReveal";
 import PageTransition from "./components/PageTransition";
 
-
+import { ThemeProvider } from "./context/ThemeContext";
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -79,6 +79,7 @@ function StoreLayout({ children }) {
 export default function App() {
   useReveal();
   return (
+     <ThemeProvider>
     <AuthProvider>
       <CustomerProvider>
         <CartProvider>
@@ -128,6 +129,7 @@ export default function App() {
         </CartProvider>
       </CustomerProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
   

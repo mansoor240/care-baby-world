@@ -16,13 +16,11 @@ For questions, contact us at ${storeConfig.email}.`,
 
 By placing an order on ${storeConfig.name}, you agree to provide accurate delivery information and to pay the total amount shown at checkout.`,
   },
-    shipping: {
+  shipping: {
     title: "Shipping Policy",
-    body: `Delivery is available in Hyderabad and surrounding metro areas (pincodes starting with 500, 501, and 502). Estimated delivery: ${storeConfig.estimatedDelivery}.
+    body: `Delivery is available in and around ${storeConfig.address.city}. Estimated delivery: ${storeConfig.estimatedDelivery}.
 
-Free delivery on orders above ${storeConfig.currency}${storeConfig.freeDeliveryThreshold}. A delivery fee of ${storeConfig.currency}${storeConfig.deliveryFee} applies below this threshold.
-
-For delivery outside these areas, please contact us on WhatsApp before placing your order.`,
+Free delivery on orders above ${storeConfig.currency}${storeConfig.freeDeliveryThreshold}. A delivery fee of ${storeConfig.currency}${storeConfig.deliveryFee} applies below this threshold.`,
   },
   returns: {
     title: "Return & Refund Policy",
@@ -39,19 +37,19 @@ export default function Policies() {
   if (!doc) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center">
-        <h1 className="font-display text-2xl">Page not found</h1>
-        <Link to="/" className="mt-3 inline-block text-blush-500">← Back home</Link>
+        <h1 className="font-display text-2xl text-ink-900 dark:text-night-50">Page not found</h1>
+        <Link to="/" className="mt-3 inline-block text-blush-500 dark:text-blush-300">← Back home</Link>
       </div>
     );
   }
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="font-display text-3xl">{doc.title}</h1>
-      <p className="mt-2 text-xs text-ink-500">
+      <h1 className="font-display text-3xl text-ink-900 dark:text-night-50">{doc.title}</h1>
+      <p className="mt-2 text-xs text-ink-500 dark:text-night-400">
         ⚠️ Placeholder content — replace with your own legal text before going live.
       </p>
-      <div className="prose mt-6 whitespace-pre-line text-sm leading-relaxed text-ink-700">
+      <div className="prose mt-6 whitespace-pre-line text-sm leading-relaxed text-ink-700 dark:text-night-100">
         {doc.body}
       </div>
     </article>

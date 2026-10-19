@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
+import ThemeToggle from "../ThemeToggle";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCustomer } from "../../context/CustomerContext";
@@ -48,44 +49,45 @@ export default function Header() {
   };
 
   return (
-    <header
+            <header
       className={`sticky top-0 z-40 border-b transition-all duration-300 ${
         scrolled
-          ? "border-ink-900/10 bg-cream/95 backdrop-blur shadow-sm"
-          : "border-transparent bg-cream"
+          ? "border-ink-900/10 bg-cream/95 backdrop-blur shadow-sm dark:border-white/5 dark:bg-night-800/95"
+          : "border-transparent bg-cream dark:border-white/5 dark:bg-night-800"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-        <button
-          className="md:hidden -ml-1 p-2 text-ink-900"
+                <button
+          className="md:hidden -ml-1 p-2 text-ink-900 dark:text-night-50"
           onClick={() => setOpen(!open)}
           aria-label="Menu"
         >
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-                <Link
+                        <Link
           to="/"
           onClick={(e) => {
-            // If already on home, smooth scroll to top instead of reloading
             if (window.location.pathname === "/") {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: "smooth" });
             }
           }}
-          className="font-display text-xl font-bold text-ink-900 transition hover:opacity-80"
+          className="font-display text-xl font-bold text-ink-900 transition hover:opacity-80 dark:text-night-50"
         >
           Care<span className="text-blush-400">BabyStore</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 ml-4">
           {NAV.map((n) => (
-            <NavLink
+                        <NavLink
               key={n.to}
               to={n.to}
               className={({ isActive }) =>
                 `text-sm ${
-                  isActive ? "text-ink-900 font-semibold" : "text-ink-500 hover:text-ink-900"
+                  isActive
+                    ? "text-ink-900 font-semibold dark:text-night-50"
+                    : "text-ink-500 hover:text-ink-900 dark:text-night-300 dark:hover:text-night-50"
                 }`
               }
             >
@@ -97,21 +99,22 @@ export default function Header() {
         <form onSubmit={submit} className="ml-auto hidden md:flex items-center">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
-            <input
+                        <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search for products…"
-              className="w-56 lg:w-72 rounded-full border border-ink-900/10 bg-white pl-9 pr-4 py-2 text-sm focus:border-blush-400 focus:outline-none"
+              className="w-56 lg:w-72 rounded-full border border-ink-900/10 bg-white pl-9 pr-4 py-2 text-sm text-ink-900 placeholder:text-ink-300 focus:border-blush-400 focus:outline-none dark:border-white/10 dark:bg-night-700 dark:text-night-50 dark:placeholder:text-night-400"
             />
           </div>
         </form>
 
-        <div className="ml-auto md:ml-2 flex items-center gap-1">
+                <div className="ml-auto md:ml-2 flex items-center gap-1">
+          <ThemeToggle />
           <Link to="/search" className="md:hidden p-2" aria-label="Search">
             <Search size={20} />
           </Link>
 
-          <Link to="/wishlist" className="relative p-2" aria-label="Wishlist">
+                    <Link to="/wishlist" className="relative p-2 text-ink-900 dark:text-night-50" aria-label="Wishlist">
             <Heart size={20} />
             {wishCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-blush-400 px-1 text-[10px] font-bold text-white">
@@ -120,7 +123,7 @@ export default function Header() {
             )}
           </Link>
 
-          <Link to="/cart" className="relative p-2" aria-label="Cart">
+                    <Link to="/cart" className="relative p-2 text-ink-900 dark:text-night-50" aria-label="Cart">
             <ShoppingBag size={20} />
             {cartCount > 0 && (
               <span
@@ -133,10 +136,10 @@ export default function Header() {
             )}
           </Link>
 
-          {isLoggedIn ? (
+                    {isLoggedIn ? (
             <Link
               to="/account"
-              className="hidden md:flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-3 py-1.5 text-sm hover:bg-cream"
+              className="hidden md:flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-3 py-1.5 text-sm text-ink-900 hover:bg-cream dark:border-white/10 dark:bg-night-700 dark:text-night-50 dark:hover:bg-night-600 transition"
             >
               <User size={16} />
               <span className="max-w-[80px] truncate">
@@ -146,16 +149,16 @@ export default function Header() {
           ) : (
             <Link
               to="/login"
-              className="hidden md:flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-3 py-1.5 text-sm hover:bg-cream"
+              className="hidden md:flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-3 py-1.5 text-sm text-ink-900 hover:bg-cream dark:border-white/10 dark:bg-night-700 dark:text-night-50 dark:hover:bg-night-600 transition"
             >
               <User size={16} />
               Login
             </Link>
           )}
 
-          <Link
+                    <Link
             to={isLoggedIn ? "/account" : "/login"}
-            className="md:hidden p-2"
+            className="md:hidden p-2 text-ink-900 dark:text-night-50"
             aria-label="Account"
           >
             <User size={20} />

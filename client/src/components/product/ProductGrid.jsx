@@ -3,9 +3,7 @@ import ProductCard from "./ProductCard";
 
 const container = {
   hidden: {},
-  show: {
-    transition: { staggerChildren: 0.06 },
-  },
+  show: { transition: { staggerChildren: 0.06 } },
 };
 
 const item = {
@@ -30,10 +28,12 @@ export default function ProductGrid({
 
   if (!products.length) {
     return (
-      <div className="rounded-3xl bg-white p-12 text-center shadow-card">
+      <div className="rounded-3xl bg-white p-12 text-center shadow-card dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5">
         <div className="text-5xl">🔍</div>
-        <h3 className="mt-3 font-display text-xl">No products found</h3>
-        <p className="mt-1 text-sm text-ink-500">
+        <h3 className="mt-3 font-display text-xl text-ink-900 dark:text-night-50">
+          No products found
+        </h3>
+        <p className="mt-1 text-sm text-ink-500 dark:text-night-300">
           Try adjusting filters or search again.
         </p>
       </div>
@@ -59,7 +59,7 @@ export default function ProductGrid({
 
 function ProductSkeleton() {
   return (
-    <div className="overflow-hidden rounded-3xl bg-white shadow-card">
+    <div className="overflow-hidden rounded-3xl bg-white shadow-card dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5">
       <div className="skeleton aspect-square w-full" />
       <div className="space-y-2 p-4">
         <div className="skeleton h-3 w-full rounded-full" />

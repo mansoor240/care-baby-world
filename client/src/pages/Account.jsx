@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { User, Package, Heart, MapPin, LogOut } from "lucide-react";
+import { User, Package, Heart, MapPin } from "lucide-react";
 import { storeConfig } from "../config/store";
 
 export default function Account() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-display text-3xl">My Account</h1>
-      <p className="mt-1 text-sm text-ink-500">
+      <h1 className="font-display text-3xl text-ink-900 dark:text-night-50">My Account</h1>
+      <p className="mt-1 text-sm text-ink-500 dark:text-night-300">
         Customer accounts are optional in this MVP. Track orders via WhatsApp.
       </p>
 
@@ -20,21 +20,21 @@ export default function Account() {
           <Link
             key={it.title}
             to={it.to}
-            className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-card hover:shadow-soft"
+            className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-card hover:shadow-soft transition dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5"
           >
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-blush-50 text-blush-500">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-blush-50 text-blush-500 dark:bg-blush-400/15 dark:text-blush-300">
               <it.icon size={18} />
             </div>
             <div>
-              <div className="text-sm font-semibold">{it.title}</div>
-              <div className="text-xs text-ink-500">{it.text}</div>
+              <div className="text-sm font-semibold text-ink-900 dark:text-night-50">{it.title}</div>
+              <div className="text-xs text-ink-500 dark:text-night-300">{it.text}</div>
             </div>
           </Link>
         ))}
       </div>
 
-      <div className="mt-8 rounded-3xl bg-sand-50 p-6 text-sm">
-        <p className="text-ink-700">
+      <div className="mt-8 rounded-3xl bg-sand-50 p-6 text-sm dark:bg-night-800 dark:ring-1 dark:ring-white/5">
+        <p className="text-ink-700 dark:text-night-100">
           For order help, chat with us on WhatsApp: <b>{storeConfig.phone}</b>
         </p>
       </div>

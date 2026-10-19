@@ -32,27 +32,25 @@ export default function Category() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <nav className="text-xs text-ink-500">
-        <Link to="/" className="hover:text-ink-900 transition">
-          Home
-        </Link>
+      <nav className="text-xs text-ink-500 dark:text-night-400">
+        <Link to="/" className="hover:text-ink-900 transition dark:hover:text-night-50">Home</Link>
         <span className="mx-1.5">/</span>
-        <span className="text-ink-900">{category?.name || "Category"}</span>
+        <span className="text-ink-900 dark:text-night-50">{category?.name || "Category"}</span>
       </nav>
 
-      <header className="mt-4 rounded-4xl bg-gradient-to-r from-blush-50 to-sand-50 p-8">
-        <h1 className="font-display text-3xl text-ink-900">
+      <header className="mt-4 rounded-4xl bg-gradient-to-r from-blush-50 to-sand-50 p-8 dark:from-night-700 dark:to-night-800">
+        <h1 className="font-display text-3xl text-ink-900 dark:text-night-50">
           {category?.emoji} {category?.name}
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-ink-500">{category?.description}</p>
+        <p className="mt-1 max-w-2xl text-sm text-ink-500 dark:text-night-300">{category?.description}</p>
       </header>
 
       <div className="mt-6 flex items-center justify-between">
-        <p className="text-sm text-ink-500">{meta.total} products</p>
+        <p className="text-sm text-ink-500 dark:text-night-300">{meta.total} products</p>
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="rounded-full border border-ink-900/10 bg-white px-3 py-2 text-sm"
+          className="rounded-full border border-ink-900/10 bg-white px-3 py-2 text-sm text-ink-900 dark:border-white/10 dark:bg-night-800 dark:text-night-50"
         >
           <option value="popular">Popular</option>
           <option value="newest">Newest</option>
@@ -63,36 +61,32 @@ export default function Category() {
 
       <div className="mt-6">
         {!loading && products.length === 0 ? (
-          <div className="rounded-3xl bg-white p-12 text-center shadow-card animate-[fadeIn_0.4s_ease-out]">
-            <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl">
+          <div className="rounded-3xl bg-white p-12 text-center shadow-card dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5">
+            <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl dark:bg-blush-400/15">
               🌱
             </div>
-            <h3 className="mt-6 font-display text-2xl">Coming soon</h3>
-            <p className="mt-2 max-w-md mx-auto text-sm text-ink-500">
+            <h3 className="mt-6 font-display text-2xl text-ink-900 dark:text-night-50">Coming soon</h3>
+            <p className="mt-2 max-w-md mx-auto text-sm text-ink-500 dark:text-night-300">
               We're adding products to <strong>{category?.name || "this category"}</strong>.
               Check back soon or explore other categories.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
                 to="/shop"
-                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95"
+                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-transform active:scale-95 dark:bg-blush-500 dark:hover:bg-blush-400"
               >
                 Browse all products
               </Link>
               <Link
                 to="/"
-                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-transform active:scale-95"
+                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-transform active:scale-95 dark:border-white/15 dark:bg-night-800 dark:text-night-50 dark:hover:bg-night-700"
               >
                 Go home
               </Link>
             </div>
           </div>
         ) : (
-          <ProductGrid
-            key={`${slug}-${sort}-${page}`}
-            products={products}
-            loading={loading}
-          />
+          <ProductGrid key={`${slug}-${sort}-${page}`} products={products} loading={loading} />
         )}
       </div>
 
@@ -101,17 +95,17 @@ export default function Category() {
           <button
             disabled={page <= 1}
             onClick={() => setPage(page - 1)}
-            className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm disabled:opacity-40"
+            className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm text-ink-900 disabled:opacity-40 dark:border-white/10 dark:bg-night-800 dark:text-night-50"
           >
             ← Prev
           </button>
-          <span className="text-sm text-ink-500">
+          <span className="text-sm text-ink-500 dark:text-night-300">
             {page} / {meta.pages}
           </span>
           <button
             disabled={page >= meta.pages}
             onClick={() => setPage(page + 1)}
-            className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm disabled:opacity-40"
+            className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm text-ink-900 disabled:opacity-40 dark:border-white/10 dark:bg-night-800 dark:text-night-50"
           >
             Next →
           </button>
