@@ -11,9 +11,10 @@ export default function HorizontalScroll({ products = [], title = "Best Sellers"
     offset: ["start end", "end start"],
   });
 
-  // Move cards horizontally based on scroll
-  const x = useTransform(scrollYProgress, [0, 1], ["10%", "-60%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0.3, 1, 1, 0.3]);
+  // Better balanced positions — starts at 0, ends left only enough to show last cards
+  // Uses calc so it's responsive
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-55%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0.4, 1, 1, 0.4]);
 
   if (!products.length) return null;
 
@@ -48,10 +49,10 @@ export default function HorizontalScroll({ products = [], title = "Best Sellers"
         </div>
       </motion.div>
 
-      {/* Horizontal scroll row */}
+      {/* Horizontal scroll row — starts at left edge, moves left */}
       <motion.div
         style={{ x, opacity }}
-        className="flex gap-6 pl-4 md:pl-[calc((100vw-1280px)/2+1rem)]"
+        className="flex gap-6 px-4 md:px-8"
       >
         {products.map((product) => {
           const off = discountPercent(product.price, product.originalPrice);
@@ -72,14 +73,12 @@ export default function HorizontalScroll({ products = [], title = "Best Sellers"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
 
-                {/* Discount badge */}
                 {off && (
                   <span className="absolute left-3 top-3 rounded-full bg-blush-400 px-2.5 py-1 text-[11px] font-bold text-white">
                     {off}% OFF
                   </span>
                 )}
 
-                {/* Out of stock overlay */}
                 {!inStock && (
                   <div className="absolute inset-0 grid place-items-center bg-white/70 backdrop-blur-sm dark:bg-night-900/70">
                     <span className="rounded-full bg-ink-900 px-4 py-2 text-xs font-semibold text-white dark:bg-night-950">
@@ -113,13 +112,12 @@ export default function HorizontalScroll({ products = [], title = "Best Sellers"
                 </div>
               </div>
 
-              {/* Hover gradient overlay */}
               <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-blush-50/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-blush-400/10" />
             </Link>
           );
         })}
 
-        {/* End card */}
+        {/* End card — CTA to explore more */}
         <Link
           to="/shop"
           className="flex w-64 shrink-0 flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-ink-900/15 bg-white/50 p-6 text-center transition hover:border-blush-400 hover:bg-blush-50 dark:border-white/10 dark:bg-night-800/50 dark:hover:border-blush-400/50"
@@ -141,10 +139,12 @@ export default function HorizontalScroll({ products = [], title = "Best Sellers"
         </Link>
       </motion.div>
 
-      {/* Bottom hint */}
+      {/* Scroll indicator */}
       <div className="mx-auto mt-6 max-w-7xl px-4">
-        <div className="text-center text-xs text-ink-500 dark:text-night-400">
-          ✨ Scroll to see more
+        <div className="flex items-center justify-center gap-2 text-xs text-ink-500 dark:text-night-400">
+          <span>Scroll down</span>
+          <span className="animate-bounce">↓</span>
+          <span>to see more</span>
         </div>
       </div>
     </section>
