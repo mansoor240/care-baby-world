@@ -59,6 +59,29 @@ router.put("/orders/:id/status", async (req, res) => {
   res.json(order);
 });
 
+// DELETE /api/admin/orders/:id
+// Only cancelled orders can be deleted (prevents accidental data loss)
+router.delete("/orders/:id", async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    if (order.status !== "cancelled") {
+      return res.status(400).json({
+        error: "Only cancelled orders can be deleted. Cancel it first.",
+      });
+    }
+
+    await Order.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not delete order" });
+  }
+});
+
 /* ── Categories ─────────────────────────────────────── */
 router.get("/categories", async (_req, res) => {
   const cats = await Category.find().sort({ order: 1, name: 1 });

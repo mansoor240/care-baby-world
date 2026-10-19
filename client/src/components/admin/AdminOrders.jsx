@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../../api/client";
 import { formatPrice, formatDate } from "../../lib/format";
+import { Trash2 } from "lucide-react";
 import { whatsappLink } from "../../lib/whatsapp";
 import { MessageCircle } from "lucide-react";
 
@@ -20,7 +21,34 @@ export default function AdminOrders() {
     load();
     if (selected?._id === id) setSelected({ ...selected, status });
   };
+  const updateStatus = async (id, status) => {
+    await api.put(`/admin/orders/${id}/status`, { status });
+    toast.success("Status updated");
+    load();
+    if (selected?._id === id) setSelected({ ...selected, status });
+  };
 
+  const deleteOrder = async (order) => {
+    if (order.status !== "cancelled") {
+      toast.error("Cancel this order first, then delete");
+      return;
+    }
+    if (
+      !confirm(
+        `DELETE order ${order.orderNumber} permanently?\n\nThis cannot be undone.`
+      )
+    )
+      return;
+
+    try {
+      await api.delete(`/admin/orders/${order._id}`);
+      toast.success("Order deleted");
+      setSelected(null);
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Could not delete");
+    }
+  };
   return (
     <div>
       <h1 className="font-display text-2xl">Orders</h1>
@@ -60,8 +88,21 @@ export default function AdminOrders() {
                     {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </td>
-                <td className="p-3 text-right">
-                  <button onClick={() => setSelected(o)} className="text-blush-500 text-xs">View</button>
+                                <td className="p-3 text-right">
+                  <button
+                    onClick={() => setSelected(o)}
+                    className="text-blush-500 text-xs hover:underline"
+                  >
+                    View
+                  </button>
+                  {o.status === "cancelled" && (
+                    <button
+                      onClick={() => deleteOrder(o)}
+                      className="ml-3 text-red-500 text-xs hover:underline"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -75,10 +116,24 @@ export default function AdminOrders() {
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4" onClick={() => setSelected(null)}>
           <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between">
               <h2 className="font-display text-xl">{selected.orderNumber}</h2>
               <button onClick={() => setSelected(null)}>✕</button>
             </div>
+
+            {selected.status === "cancelled" && (
+              <div className="mt-3 rounded-2xl bg-red-50 p-3">
+                <p className="text-xs text-red-700">
+                  ⚠️ This order is cancelled. You can delete it permanently.
+                </p>
+                <button
+                  onClick={() => deleteOrder(selected)}
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-red-500 py-2 text-xs font-medium text-white hover:bg-red-600 transition"
+                >
+                  <Trash2 size={14} /> Delete this order permanently
+                </button>
+              </div>
+            )}
             <div className="mt-4 text-sm">
               <div className="font-semibold">{selected.customer.fullName}</div>
               <div className="text-ink-500">{selected.customer.mobile}</div>
