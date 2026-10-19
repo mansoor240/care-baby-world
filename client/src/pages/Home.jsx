@@ -118,19 +118,23 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Hero image with rotation on scroll */}
+                    {/* Hero image: slide in from right on mount + rotate on scroll */}
           <motion.div
-            style={{
-              y: imageY,
-              scale: imageScale,
-              rotate: imageRotate,
-            }}
             initial={{ opacity: 0, x: 60 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="relative aspect-[4/3] md:aspect-auto md:min-h-[420px]"
           >
-            <Hero3D />
+            <motion.div
+              style={{
+                y: imageY,
+                scale: imageScale,
+                rotate: imageRotate,
+              }}
+              className="h-full w-full"
+            >
+              <Hero3D />
+            </motion.div>
           </motion.div>
         </div>
       </section>
