@@ -4,15 +4,12 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import api from "../api/client";
 import ProductGrid from "../components/product/ProductGrid";
 import CategoryCard3D from "../components/CategoryCard3D";
-import MagneticButton from "../components/MagneticButton";
-import AnimatedCounter from "../components/AnimatedCounter";
-import Hero3D from "../components/Hero3D";
 import ScrollShowcase from "../components/ScrollShowcase";
 import ScrollRevealText from "../components/ScrollRevealText";
 import HorizontalScroll from "../components/HorizontalScroll";
 import { storeConfig } from "../config/store";
 import { whatsappLink, whatsappMessages } from "../lib/whatsapp";
-import { MessageCircle, Truck, ShieldCheck, RotateCcw, HeartHandshake, Star } from "lucide-react";
+import { MessageCircle, Truck, ShieldCheck, RotateCcw, HeartHandshake } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -34,18 +31,6 @@ export default function Home() {
   const [bestsellers, setBestsellers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-
-  const textY = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  const imageY = useTransform(scrollYProgress, [0, 1], [0, -80]);
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
-  // NEW: Hero image rotates as you scroll
-  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 8]);
 
   const featuredRef = useRef(null);
   const featuredScroll = useScroll({
@@ -71,75 +56,10 @@ export default function Home() {
 
   return (
     <div>
-      {/* ─── SCROLL SHOWCASE (top) ─────────────────────── */}
+      {/* ─── SCROLL SHOWCASE (Cinematic Top) ─────────── */}
       <ScrollShowcase />
 
-      {/* ─── HERO ──────────────────────────────────── */}
-      <section
-        ref={heroRef}
-        className="relative overflow-hidden bg-gradient-to-b from-blush-50 via-cream to-cream dark:from-night-800 dark:via-night-900 dark:to-night-900"
-      >
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-2 md:py-20">
-          <motion.div
-            style={{ y: textY }}
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex flex-col justify-center"
-          >
-            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-blush-500 shadow-card dark:bg-night-800 dark:text-blush-300 dark:shadow-none dark:ring-1 dark:ring-white/10">
-              <Star size={12} fill="currentColor" /> Trusted by{" "}
-              <strong className="text-blush-500 dark:text-blush-300">
-                <AnimatedCounter end={500} suffix="+" />
-              </strong>{" "}
-              families
-            </span>
-            <h1 className="mt-4 font-display text-4xl leading-tight text-ink-900 sm:text-5xl dark:text-night-50">
-              Everything Your <span className="text-blush-400 dark:text-blush-300">Little One</span> Needs
-            </h1>
-            <p className="mt-4 max-w-md text-ink-500 dark:text-night-300">
-              Baby essentials, clothing, toys and care products — all in one place. Delivered to your doorstep.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <MagneticButton
-                to="/shop"
-                className="rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-colors dark:bg-blush-500 dark:hover:bg-blush-400"
-              >
-                Shop Now
-              </MagneticButton>
-              <MagneticButton
-                to="/shop"
-                strength={20}
-                className="rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-medium text-ink-900 hover:bg-cream transition-colors dark:border-white/15 dark:bg-night-800 dark:text-night-50 dark:hover:bg-night-700"
-              >
-                Explore Categories
-              </MagneticButton>
-            </div>
-          </motion.div>
-
-                    {/* Hero image: slide in from right on mount + rotate on scroll */}
-          <motion.div
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative aspect-[4/3] md:aspect-auto md:min-h-[420px]"
-          >
-            <motion.div
-              style={{
-                y: imageY,
-                scale: imageScale,
-                rotate: imageRotate,
-              }}
-              className="h-full w-full"
-            >
-              <Hero3D />
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ─── CATEGORIES (rotating icons) ─────────────── */}
+      {/* ─── CATEGORIES ─────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-12">
         <motion.div
           initial="hidden"
@@ -167,7 +87,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ─── FEATURED (with parallax) ─────────────────── */}
+      {/* ─── FEATURED ─────────────────────────────────── */}
       <section ref={featuredRef} className="mx-auto max-w-7xl px-4 py-8">
         <motion.div
           style={{ y: featuredY }}
@@ -191,26 +111,12 @@ export default function Home() {
         </motion.div>
       </section>
 
-           {/* ─── BESTSELLERS ────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={fadeUp}
-          className="mb-6"
-        >
-          <h2 className="font-display text-2xl text-ink-900 dark:text-night-50">Best Sellers</h2>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
-        >
-          <ProductGrid products={bestsellers} loading={loading} />
-        </motion.div>
-      </section>
+      {/* ─── HORIZONTAL SCROLL BESTSELLERS ────────────── */}
+      <HorizontalScroll
+        products={bestsellers}
+        title="Best Sellers"
+        subtitle="Loved by parents"
+      />
 
       {/* ─── OFFER BANNER ───────────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-8">

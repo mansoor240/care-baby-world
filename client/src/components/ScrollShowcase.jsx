@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const PRODUCTS = [
   { emoji: "🧸", name: "Plush Teddy", color: "from-blush-100 to-blush-200 dark:from-blush-400/20 dark:to-blush-400/10", delay: 0, dir: "left" },
@@ -23,11 +24,9 @@ export default function ScrollShowcase() {
     offset: ["start end", "end start"],
   });
 
-  // Camera/zoom effect
   const containerScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.9, 1.05, 0.9]);
   const containerRotate = useTransform(scrollYProgress, [0, 1], [0, 8]);
 
-  // Headline reveal
   const headlineOpacity = useTransform(scrollYProgress, [0.3, 0.5, 0.8], [0, 1, 0]);
   const headlineY = useTransform(scrollYProgress, [0.3, 0.5], [30, 0]);
 
@@ -61,6 +60,22 @@ export default function ScrollShowcase() {
           <p className="mx-auto mt-3 max-w-2xl text-ink-500 dark:text-night-300">
             Handpicked baby essentials, crafted with love for the smallest members of your family.
           </p>
+
+          {/* ✅ NEW: CTA Buttons — moved from old hero */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to="/shop"
+              className="rounded-full bg-ink-900 px-7 py-3.5 text-sm font-medium text-white shadow-soft transition-all hover:bg-ink-700 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 dark:bg-blush-500 dark:hover:bg-blush-400"
+            >
+              Shop Now
+            </Link>
+            <Link
+              to="/shop"
+              className="rounded-full border border-ink-900/15 bg-white px-7 py-3.5 text-sm font-medium text-ink-900 transition-all hover:bg-cream hover:-translate-y-0.5 hover:shadow-soft active:scale-95 dark:border-white/15 dark:bg-night-800 dark:text-night-50 dark:hover:bg-night-700"
+            >
+              Explore Categories
+            </Link>
+          </div>
         </motion.div>
 
         {/* Floating products scene */}
@@ -117,16 +132,12 @@ export default function ScrollShowcase() {
                     style={{ transformStyle: "preserve-3d" }}
                   >
                     <span className="text-6xl md:text-7xl select-none">{product.emoji}</span>
-
-                    {/* Small floating dot */}
                     <motion.div
                       animate={{ y: [-4, 4, -4] }}
                       transition={{ duration: 2, repeat: Infinity, delay: product.delay }}
                       className="absolute -right-2 -top-2 h-3 w-3 rounded-full bg-white shadow-card dark:bg-night-700"
                     />
                   </motion.div>
-
-                  {/* Label */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -142,7 +153,7 @@ export default function ScrollShowcase() {
           </motion.div>
         </div>
 
-        {/* Cinematic headline reveal */}
+        {/* Cinematic headline */}
         <motion.div
           style={{ opacity: headlineOpacity, y: headlineY }}
           className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
@@ -156,23 +167,6 @@ export default function ScrollShowcase() {
               <span className="italic text-blush-400 dark:text-blush-300">Endless Love.</span>
             </h3>
           </div>
-        </motion.div>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-12 text-center"
-        >
-          <a
-            href="/shop"
-            className="inline-flex items-center gap-2 rounded-full bg-ink-900 px-8 py-4 text-sm font-medium text-white hover:bg-ink-700 transition-all hover:shadow-soft hover:-translate-y-0.5 active:scale-95 dark:bg-blush-500 dark:hover:bg-blush-400"
-          >
-            Explore All Products
-            <span aria-hidden="true">→</span>
-          </a>
         </motion.div>
       </div>
     </section>
