@@ -6,7 +6,6 @@ import ProductGrid from "../components/product/ProductGrid";
 import CategoryCard3D from "../components/CategoryCard3D";
 import ScrollShowcase from "../components/ScrollShowcase";
 import ScrollRevealText from "../components/ScrollRevealText";
-import HorizontalScroll from "../components/HorizontalScroll";
 import { storeConfig } from "../config/store";
 import { whatsappLink, whatsappMessages } from "../lib/whatsapp";
 import { MessageCircle, Truck, ShieldCheck, RotateCcw, HeartHandshake } from "lucide-react";
@@ -111,12 +110,26 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ─── HORIZONTAL SCROLL BESTSELLERS ────────────── */}
-      <HorizontalScroll
-        products={bestsellers}
-        title="Best Sellers"
-        subtitle="Loved by parents"
-      />
+            {/* ─── BESTSELLERS (grid) ─────────────────────── */}
+      <section className="mx-auto max-w-7xl px-4 py-8">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+          className="mb-6"
+        >
+          <h2 className="font-display text-2xl text-ink-900 dark:text-night-50">Best Sellers</h2>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5 }}
+        >
+          <ProductGrid products={bestsellers} loading={loading} />
+        </motion.div>
+      </section>
 
       {/* ─── OFFER BANNER ───────────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-8">
