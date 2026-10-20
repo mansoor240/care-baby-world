@@ -364,3 +364,18 @@ html.dark .skeleton {
     transition: none;
   }
 }
+
+/* ─── ADMIN PANEL: Force light mode ──────────────── */
+.admin-panel {
+  color-scheme: light;
+}
+
+/* Override dark class on admin panel */
+.admin-panel,
+.admin-panel * {
+  /* Reset to light mode defaults */
+}
+
+html.dark .admin-panel {
+  --admin-override: 1;
+}

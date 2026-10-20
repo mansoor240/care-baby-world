@@ -1,10 +1,31 @@
+import { useEffect } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingBag, FolderTree, Ticket, LogOut, HelpCircle, MessageSquare } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  FolderTree,
+  Ticket,
+  LogOut,
+  HelpCircle,
+  MessageSquare,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLayout() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+
+  // ✅ Force admin panel to always be light mode
+  useEffect(() => {
+    const html = document.documentElement;
+    const wasDark = html.classList.contains("dark");
+    if (wasDark) html.classList.remove("dark");
+    return () => {
+      // Restore on unmount (when leaving admin panel)
+      if (wasDark) html.classList.add("dark");
+    };
+  }, []);
 
   const nav = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -32,7 +53,9 @@ export default function AdminLayout() {
                 end={n.end}
                 className={({ isActive }) =>
                   `flex items-center gap-2 rounded-2xl px-3 py-2 text-sm ${
-                    isActive ? "bg-blush-50 text-blush-500 font-semibold" : "text-ink-700 hover:bg-cream"
+                    isActive
+                      ? "bg-blush-50 text-blush-500 font-semibold"
+                      : "text-ink-700 hover:bg-cream"
                   }`
                 }
               >
