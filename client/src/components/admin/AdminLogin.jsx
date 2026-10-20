@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
@@ -9,6 +9,16 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // ✅ Force light mode on admin login page
+  useEffect(() => {
+    const html = document.documentElement;
+    const wasDark = html.classList.contains("dark");
+    if (wasDark) html.classList.remove("dark");
+    return () => {
+      if (wasDark) html.classList.add("dark");
+    };
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -34,21 +44,21 @@ export default function AdminLogin() {
 
         <div className="mt-6 space-y-4">
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium">Username</span>
+            <span className="mb-1.5 block text-sm font-medium text-ink-700">Username</span>
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm focus:outline-none"
+              className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm text-ink-900 focus:border-blush-400 focus:outline-none"
               autoComplete="username"
             />
           </label>
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium">Password</span>
+            <span className="mb-1.5 block text-sm font-medium text-ink-700">Password</span>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm focus:outline-none"
+              className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm text-ink-900 focus:border-blush-400 focus:outline-none"
               autoComplete="current-password"
             />
           </label>
@@ -62,7 +72,7 @@ export default function AdminLogin() {
           {loading ? "Signing in…" : "Sign in"}
         </button>
         <p className="mt-4 text-center text-xs text-ink-500">
-          Default: admin / admin123 (change in <code>.env</code>)
+          Default: admin / admin123 (change in <code className="rounded bg-cream px-1 py-0.5 text-[10px]">.env</code>)
         </p>
       </form>
     </div>
