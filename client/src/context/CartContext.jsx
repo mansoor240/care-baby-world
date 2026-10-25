@@ -1,20 +1,31 @@
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-/* Zustand store (persisted to localStorage) */
 export const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
       coupon: null,
+
+      // `variant` can be:
+      //   - "" or null        → no-variant product (legacy)
+      //   - an object {_id, name, price, originalPrice, stock, sku}
       add: (product, qty = 1, variant = "") => {
-        const key = `${product._id}::${variant}`;
+        const variantId = variant?._id || null;
+        const key = `${product._id}::${variantId || "base"}`;
         const existing = get().items.find((i) => i.key === key);
+
+        const price = variant?.price ?? product.price;
+        const originalPrice = variant?.originalPrice ?? product.originalPrice;
+        const stock = variant?.stock ?? product.stock;
+        const variantName = variant?.name || "";
+
         if (existing) {
+          const nextQty = Math.min(existing.quantity + qty, stock || 99);
           set({
             items: get().items.map((i) =>
-              i.key === key ? { ...i, quantity: i.quantity + qty } : i
+              i.key === key ? { ...i, quantity: nextQty, stock } : i
             ),
           });
         } else {
@@ -24,26 +35,32 @@ export const useCartStore = create(
               {
                 key,
                 productId: product._id,
+                variantId,
+                variantName,
                 name: product.name,
                 slug: product.slug,
                 image: product.images?.[0] || "",
-                price: product.price,
-                originalPrice: product.originalPrice,
+                price,
+                originalPrice,
                 quantity: qty,
-                variant,
-                stock: product.stock,
+                stock,
               },
             ],
           });
         }
       },
+
       remove: (key) => set({ items: get().items.filter((i) => i.key !== key) }),
+
       setQty: (key, qty) =>
         set({
           items: get().items.map((i) =>
-            i.key === key ? { ...i, quantity: Math.max(1, qty) } : i
+            i.key === key
+              ? { ...i, quantity: Math.max(1, Math.min(qty, i.stock ?? 99)) }
+              : i
           ),
         }),
+
       clear: () => set({ items: [], coupon: null }),
       setCoupon: (coupon) => set({ coupon }),
       count: () => get().items.reduce((s, i) => s + i.quantity, 0),
@@ -53,7 +70,6 @@ export const useCartStore = create(
   )
 );
 
-/* React context for a more idiomatic API in components */
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {

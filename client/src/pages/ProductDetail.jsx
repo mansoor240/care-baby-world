@@ -19,7 +19,7 @@ export default function ProductDetail() {
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [qty, setQty] = useState(1);
-  const [size, setSize] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [pincode, setPincode] = useState("");
   const [pinMsg, setPinMsg] = useState(null);
 
@@ -30,11 +30,14 @@ export default function ProductDetail() {
     setLoading(true);
     setActiveImg(0);
     setQty(1);
+    setSelectedIndex(0);
     api
       .get(`/products/slug/${slug}`)
       .then((r) => {
         setData(r.data);
-        setSize(r.data.product.sizes?.[0] || "");
+        const vs = r.data.product.variants || [];
+        const firstInStock = vs.findIndex((v) => (v.stock || 0) > 0);
+        setSelectedIndex(firstInStock >= 0 ? firstInStock : 0);
         document.title = `${r.data.product.name} — CareBabyStore`;
       })
       .catch(() => setData(null))
@@ -69,14 +72,29 @@ export default function ProductDetail() {
   }
 
   const { product, related } = data;
-  const off = discountPercent(product.price, product.originalPrice);
-  const inStock = product.stock > 0;
+
+  const variants = product.variants || [];
+  const hasVariants = variants.length > 0;
+  const selectedVariant = hasVariants ? variants[selectedIndex] : null;
+
+  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
+  const displayOriginal = selectedVariant ? selectedVariant.originalPrice : product.originalPrice;
+  const displayStock = selectedVariant ? selectedVariant.stock : product.stock;
+
+  const off = discountPercent(displayPrice, displayOriginal);
+  const inStock = displayStock > 0;
   const wished = wishlist.has(product._id);
 
   const addToCart = () => {
     if (!inStock) return;
-    cart.add(product, qty, size);
-    toast.success(`Added ${qty} × ${product.name}`);
+    if (hasVariants && !selectedVariant) {
+      toast.error("Please choose a variant");
+      return;
+    }
+    cart.add(product, qty, selectedVariant || "");
+    toast.success(
+      `Added ${qty} × ${product.name}${selectedVariant ? " — " + selectedVariant.name : ""}`
+    );
   };
 
   const buyNow = () => {
@@ -120,11 +138,7 @@ export default function ProductDetail() {
         {/* GALLERY */}
         <div>
           <div className="overflow-hidden rounded-4xl bg-white shadow-card dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5">
-            <button
-              type="button"
-              onClick={() => setLightboxOpen(true)}
-              className="block w-full"
-            >
+            <button type="button" onClick={() => setLightboxOpen(true)} className="block w-full">
               <div className="aspect-square bg-cream dark:bg-night-700">
                 <img
                   src={product.images[activeImg]}
@@ -141,9 +155,7 @@ export default function ProductDetail() {
                   key={i}
                   onClick={() => setActiveImg(i)}
                   className={`h-16 w-16 overflow-hidden rounded-2xl border-2 transition-all ${
-                    i === activeImg
-                      ? "border-blush-400 dark:border-blush-300"
-                      : "border-transparent"
+                    i === activeImg ? "border-blush-400 dark:border-blush-300" : "border-transparent"
                   }`}
                 >
                   <img src={img} alt="" className="h-full w-full object-cover" />
@@ -160,7 +172,7 @@ export default function ProductDetail() {
             <span>⭐ {product.rating} ({product.reviewCount} reviews)</span>
             <span>·</span>
             <span className={inStock ? "text-sage-500 dark:text-sage-300" : "text-red-500 dark:text-red-400"}>
-              {inStock ? `In stock (${product.stock})` : "Out of stock"}
+              {inStock ? `In stock (${displayStock})` : "Out of stock"}
             </span>
           </div>
 
@@ -187,11 +199,11 @@ export default function ProductDetail() {
           )}
 
           <div className="mt-4 flex items-baseline gap-3">
-            <span className="text-3xl font-semibold text-ink-900 dark:text-night-50">{formatPrice(product.price)}</span>
-            {product.originalPrice > product.price && (
+            <span className="text-3xl font-semibold text-ink-900 dark:text-night-50">{formatPrice(displayPrice)}</span>
+            {displayOriginal > displayPrice && (
               <>
                 <span className="text-ink-300 line-through dark:text-night-400">
-                  {formatPrice(product.originalPrice)}
+                  {formatPrice(displayOriginal)}
                 </span>
                 <span className="rounded-full bg-blush-100 px-2 py-0.5 text-xs font-semibold text-blush-500 dark:bg-blush-400/20 dark:text-blush-300">
                   {off}% OFF
@@ -212,23 +224,33 @@ export default function ProductDetail() {
             </ul>
           )}
 
-          {product.sizes?.length > 0 && (
+          {/* VARIANTS */}
+          {hasVariants && (
             <div className="mt-5">
-              <div className="mb-2 text-sm font-semibold text-ink-900 dark:text-night-50">Size</div>
+              <div className="mb-2 text-sm font-semibold text-ink-900 dark:text-night-50">Choose option</div>
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSize(s)}
-                    className={`rounded-full border px-4 py-2 text-sm transition ${
-                      size === s
-                        ? "border-blush-400 bg-blush-50 text-blush-500 dark:border-blush-300 dark:bg-blush-400/20 dark:text-blush-300"
-                        : "border-ink-900/10 bg-white text-ink-900 dark:border-white/10 dark:bg-night-800 dark:text-night-50"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {variants.map((v, idx) => {
+                  const isSelected = idx === selectedIndex;
+                  const isOut = (v.stock || 0) <= 0;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSelectedIndex(idx);
+                        setQty(1);
+                      }}
+                      className={`rounded-full border px-4 py-2 text-sm transition ${
+                        isSelected
+                          ? "border-blush-400 bg-blush-50 text-blush-500 dark:border-blush-300 dark:bg-blush-400/20 dark:text-blush-300"
+                          : "border-ink-900/10 bg-white text-ink-900 hover:border-blush-400/50 dark:border-white/10 dark:bg-night-800 dark:text-night-50 dark:hover:border-blush-400/50"
+                      } ${isOut ? "opacity-40 line-through" : ""}`}
+                    >
+                      {v.name}
+                      {isOut ? " (out)" : ""}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -244,7 +266,7 @@ export default function ProductDetail() {
               </button>
               <span className="w-10 text-center text-ink-900 dark:text-night-50">{qty}</span>
               <button
-                onClick={() => setQty(Math.min(product.stock || 1, qty + 1))}
+                onClick={() => setQty(Math.min(displayStock || 1, qty + 1))}
                 className="px-4 py-2 text-lg text-ink-900 dark:text-night-50"
                 aria-label="Increase quantity"
               >

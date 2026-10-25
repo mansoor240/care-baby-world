@@ -65,6 +65,7 @@ router.post("/", optionalCustomer, async (req, res) => {
       }
     }
 
+    // ─── Validate items + resolve variant pricing + variant stock ───
     const validated = [];
     for (const it of items) {
       const product = await Product.findById(it.productId);
@@ -72,19 +73,47 @@ router.post("/", optionalCustomer, async (req, res) => {
         return res
           .status(400)
           .json({ error: `Product not found: ${it.productId}` });
-      if (product.stock < it.quantity)
-        return res
-          .status(400)
-          .json({ error: `Insufficient stock for ${product.name}` });
+
+      let variant = null;
+
+      if (product.variants && product.variants.length > 0) {
+        // Product has variants → a variantId is required
+        if (!it.variantId) {
+          return res
+            .status(400)
+            .json({ error: `Variant required for ${product.name}` });
+        }
+
+        variant = product.variants.id(it.variantId);
+        if (!variant) {
+          return res
+            .status(400)
+            .json({ error: `Invalid variant for ${product.name}` });
+        }
+
+        if (variant.stock < it.quantity) {
+          return res.status(400).json({
+            error: `Insufficient stock for ${product.name} (${variant.name})`,
+          });
+        }
+      } else {
+        // Legacy product without variants
+        if (product.stock < it.quantity) {
+          return res
+            .status(400)
+            .json({ error: `Insufficient stock for ${product.name}` });
+        }
+      }
 
       validated.push({
         productId: product._id,
+        variantId: variant ? variant._id : null,
         name: product.name,
+        variantName: variant ? variant.name : "",
         slug: product.slug,
         image: product.images?.[0] || "",
-        price: product.price,
+        price: variant ? variant.price : product.price,
         quantity: it.quantity,
-        variant: it.variant || "",
       });
     }
 
@@ -139,14 +168,21 @@ router.post("/", optionalCustomer, async (req, res) => {
       }
     }
 
-    // Decrement stock
+    // ─── Decrement stock (variant-aware) ───
     await Promise.all(
-      validated.map((it) =>
-        Product.updateOne(
-          { _id: it.productId },
-          { $inc: { stock: -it.quantity } }
-        )
-      )
+      validated.map(async (it) => {
+        if (it.variantId) {
+          await Product.updateOne(
+            { _id: it.productId, "variants._id": it.variantId },
+            { $inc: { "variants.$.stock": -it.quantity, stock: -it.quantity } }
+          );
+        } else {
+          await Product.updateOne(
+            { _id: it.productId },
+            { $inc: { stock: -it.quantity } }
+          );
+        }
+      })
     );
 
     if (coupon)

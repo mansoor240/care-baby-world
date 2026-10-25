@@ -59,8 +59,8 @@ export default function Cart() {
                     <Trash2 size={16} />
                   </button>
                 </div>
-                {item.variant && (
-                  <div className="text-xs text-ink-500 dark:text-night-400">Size: {item.variant}</div>
+                                {item.variantName && (
+                  <div className="text-xs text-ink-500">{item.variantName}</div>
                 )}
                 <div className="mt-auto flex items-center justify-between">
                   <div className="flex items-center rounded-full border border-ink-900/10 bg-cream dark:border-white/10 dark:bg-night-700">

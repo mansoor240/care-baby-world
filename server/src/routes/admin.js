@@ -19,6 +19,22 @@ router.post("/products", async (req, res) => {
   try {
     const body = { ...req.body };
     if (!body.slug) body.slug = slugify(body.name);
+
+    // Auto-set hasVariants + recalc parent price/stock from variants
+    if (Array.isArray(body.variants) && body.variants.length > 0) {
+      body.hasVariants = true;
+      body.stock = body.variants.reduce(
+        (sum, v) => sum + (Number(v.stock) || 0),
+        0
+      );
+      body.price = Math.min(
+        ...body.variants.map((v) => Number(v.price) || 0)
+      );
+    } else {
+      body.hasVariants = false;
+      body.variants = [];
+    }
+
     const product = await Product.create(body);
     res.status(201).json(product);
   } catch (err) {
@@ -27,9 +43,48 @@ router.post("/products", async (req, res) => {
 });
 
 router.put("/products/:id", async (req, res) => {
-  const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  if (!product) return res.status(404).json({ error: "Not found" });
-  res.json(product);
+  try {
+    const body = { ...req.body };
+
+    // ─── Desync guard ────────────────────────────────
+    // If this product ALREADY has variants in DB, but the request
+    // didn't send `variants` (e.g. quick +/-, or batch stock update),
+    // don't overwrite the auto-calculated parent stock/price.
+    if (!body.variants) {
+      const existing = await Product.findById(req.params.id).select(
+        "variants hasVariants"
+      );
+      if (existing?.hasVariants && existing.variants?.length > 0) {
+        delete body.stock;
+        delete body.price;
+      }
+    }
+
+    // If variants ARE sent → recalc parent price/stock from them
+    if (Array.isArray(body.variants)) {
+      if (body.variants.length > 0) {
+        body.hasVariants = true;
+        body.stock = body.variants.reduce(
+          (sum, v) => sum + (Number(v.stock) || 0),
+          0
+        );
+        body.price = Math.min(
+          ...body.variants.map((v) => Number(v.price) || 0)
+        );
+      } else {
+        // Variants array explicitly emptied → flip to simple product
+        body.hasVariants = false;
+      }
+    }
+
+    const product = await Product.findByIdAndUpdate(req.params.id, body, {
+      new: true,
+    });
+    if (!product) return res.status(404).json({ error: "Not found" });
+    res.json(product);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 router.delete("/products/:id", async (req, res) => {
@@ -96,7 +151,9 @@ router.post("/categories", async (req, res) => {
 });
 
 router.put("/categories/:id", async (req, res) => {
-  const cat = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const cat = await Category.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
   res.json(cat);
 });
 
@@ -119,7 +176,9 @@ router.post("/coupons", async (req, res) => {
 });
 
 router.put("/coupons/:id", async (req, res) => {
-  const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
   res.json(coupon);
 });
 
