@@ -10,10 +10,12 @@ export const useCartStore = create(
 
       // `variant` can be:
       //   - "" or null        → no-variant product (legacy)
-      //   - an object {_id, name, price, originalPrice, stock, sku}
+      //   - an object {_id, name, price, originalPrice, stock, sku, __idx}
       add: (product, qty = 1, variant = "") => {
         const variantId = variant?._id || null;
-        const key = `${product._id}::${variantId || "base"}`;
+        const variantTag =
+          variantId || variant?.sku || variant?.name || variant?.__idx || "base";
+        const key = `${product._id}::${variantTag}`;
         const existing = get().items.find((i) => i.key === key);
 
         const price = variant?.price ?? product.price;

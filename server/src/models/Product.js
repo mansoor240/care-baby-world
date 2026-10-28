@@ -28,13 +28,16 @@ const productSchema = new mongoose.Schema(
     sizes: { type: [String], default: [] },
     colors: { type: [String], default: [] },
     variants: [
-      {
-        name: { type: String, required: true },
-        sku: { type: String, required: true },
-        price: { type: Number, required: true, min: 0 },
-        originalPrice: { type: Number, default: 0 },
-        stock: { type: Number, required: true, default: 0, min: 0 },
-      },
+      new mongoose.Schema(
+        {
+          name: { type: String, required: true },
+          sku: { type: String, required: true },
+          price: { type: Number, required: true, min: 0 },
+          originalPrice: { type: Number, default: 0 },
+          stock: { type: Number, required: true, default: 0, min: 0 },
+        },
+        { _id: true }
+      ),
     ],
     features: { type: [String], default: [] },
     tags: { type: [String], default: [] },

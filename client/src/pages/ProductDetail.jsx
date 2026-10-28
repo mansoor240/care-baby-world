@@ -91,7 +91,7 @@ export default function ProductDetail() {
       toast.error("Please choose a variant");
       return;
     }
-    cart.add(product, qty, selectedVariant || "");
+    cart.add(product, qty, selectedVariant ? { ...selectedVariant, __idx: selectedIndex } : "");
     toast.success(
       `Added ${qty} × ${product.name}${selectedVariant ? " — " + selectedVariant.name : ""}`
     );
@@ -224,10 +224,15 @@ export default function ProductDetail() {
             </ul>
           )}
 
-          {/* VARIANTS */}
+          {/* VARIANTS — INDEX BASED (works even without _id) */}
           {hasVariants && (
             <div className="mt-5">
-              <div className="mb-2 text-sm font-semibold text-ink-900 dark:text-night-50">Choose option</div>
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-sm font-semibold text-ink-900 dark:text-night-50">Choose option</div>
+                <div className="text-xs text-ink-500 dark:text-night-300">
+                  {variants.length} option{variants.length === 1 ? "" : "s"}
+                </div>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {variants.map((v, idx) => {
                   const isSelected = idx === selectedIndex;
