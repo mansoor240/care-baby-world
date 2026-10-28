@@ -43,7 +43,6 @@ router.post("/", optionalCustomer, async (req, res) => {
     if (!customer || !items?.length)
       return res.status(400).json({ error: "Missing customer or items" });
 
-    // Validate delivery pincode is in our zone
     const { deliveryPincodePrefixes = [] } = storeConfig;
     const pincode = customer.pincode || "";
     const isDeliverable = deliveryPincodePrefixes.some((prefix) =>
@@ -65,40 +64,43 @@ router.post("/", optionalCustomer, async (req, res) => {
       }
     }
 
-    // ─── Validate items + resolve variant pricing + variant stock ───
+    // ─── Validate items + resolve variant + variant stock ───
     const validated = [];
     for (const it of items) {
       const product = await Product.findById(it.productId);
       if (!product)
-        return res
-          .status(400)
-          .json({ error: `Product not found: ${it.productId}` });
+        return res.status(400).json({ error: `Product not found: ${it.productId}` });
 
       let variant = null;
 
       if (product.variants && product.variants.length > 0) {
-        // Product has variants → a variantId is required
-        if (!it.variantId) {
-          return res
-            .status(400)
-            .json({ error: `Variant required for ${product.name}` });
+        // Try by variantId first, then fall back to sku / name / index
+        if (it.variantId) {
+          variant = product.variants.id(it.variantId);
+        }
+        if (!variant && it.variantSku) {
+          variant = product.variants.find((v) => v.sku === it.variantSku);
+        }
+        if (!variant && it.variantName) {
+          variant = product.variants.find((v) => v.name === it.variantName);
+        }
+        if (!variant && Number.isInteger(it.variantIndex)) {
+          variant = product.variants[it.variantIndex] || null;
         }
 
-        variant = product.variants.id(it.variantId);
         if (!variant) {
           return res
             .status(400)
-            .json({ error: `Invalid variant for ${product.name}` });
+            .json({ error: `Variant not found for ${product.name}` });
         }
 
-        if (variant.stock < it.quantity) {
+        if ((variant.stock || 0) < it.quantity) {
           return res.status(400).json({
             error: `Insufficient stock for ${product.name} (${variant.name})`,
           });
         }
       } else {
-        // Legacy product without variants
-        if (product.stock < it.quantity) {
+        if ((product.stock || 0) < it.quantity) {
           return res
             .status(400)
             .json({ error: `Insufficient stock for ${product.name}` });
@@ -108,8 +110,9 @@ router.post("/", optionalCustomer, async (req, res) => {
       validated.push({
         productId: product._id,
         variantId: variant ? variant._id : null,
-        name: product.name,
         variantName: variant ? variant.name : "",
+        variantSku: variant ? variant.sku : "",
+        name: product.name,
         slug: product.slug,
         image: product.images?.[0] || "",
         price: variant ? variant.price : product.price,
@@ -144,13 +147,12 @@ router.post("/", optionalCustomer, async (req, res) => {
       status: "pending",
     });
 
-    // Auto-save address to customer's account if logged in
+    // Auto-save address
     if (req.customerId) {
       const cust = await Customer.findById(req.customerId);
       if (cust && cust.addresses.length < 5) {
         const already = cust.addresses.find(
-          (a) =>
-            a.house === customer.house && a.pincode === customer.pincode
+          (a) => a.house === customer.house && a.pincode === customer.pincode
         );
         if (!already) {
           cust.addresses.push({
@@ -176,6 +178,11 @@ router.post("/", optionalCustomer, async (req, res) => {
             { _id: it.productId, "variants._id": it.variantId },
             { $inc: { "variants.$.stock": -it.quantity, stock: -it.quantity } }
           );
+        } else if (it.variantSku) {
+          await Product.updateOne(
+            { _id: it.productId, "variants.sku": it.variantSku },
+            { $inc: { "variants.$.stock": -it.quantity, stock: -it.quantity } }
+          );
         } else {
           await Product.updateOne(
             { _id: it.productId },
@@ -186,12 +193,8 @@ router.post("/", optionalCustomer, async (req, res) => {
     );
 
     if (coupon)
-      await Coupon.updateOne(
-        { _id: coupon._id },
-        { $inc: { usageCount: 1 } }
-      );
+      await Coupon.updateOne({ _id: coupon._id }, { $inc: { usageCount: 1 } });
 
-    // If online payment, create Razorpay order
     if (paymentMethod === "online") {
       const rzp = await getRazorpay();
       const razorpayOrder = await rzp.orders.create({
@@ -229,12 +232,7 @@ router.post("/verify-payment", async (req, res) => {
       razorpay_signature,
     } = req.body;
 
-    if (
-      !orderId ||
-      !razorpay_order_id ||
-      !razorpay_payment_id ||
-      !razorpay_signature
-    ) {
+    if (!orderId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ error: "Missing payment verification data" });
     }
 
@@ -262,8 +260,7 @@ router.post("/verify-payment", async (req, res) => {
   }
 });
 
-// GET /api/orders/track?orderNumber=TN-XXX&mobile=9876543210
-// OR just mobile (returns recent orders for that number)
+// GET /api/orders/track
 router.get("/track", async (req, res) => {
   const { orderNumber, mobile } = req.query;
 
@@ -271,7 +268,6 @@ router.get("/track", async (req, res) => {
     return res.status(400).json({ error: "Mobile number required" });
   }
 
-  // If orderNumber provided → find that specific order
   if (orderNumber) {
     const order = await Order.findOne({
       orderNumber: orderNumber.trim().toUpperCase(),
@@ -285,7 +281,6 @@ router.get("/track", async (req, res) => {
     return res.json({ orders: [order], single: true });
   }
 
-  // If only mobile → return recent orders for that number
   const orders = await Order.find({ "customer.mobile": mobile.trim() })
     .sort({ createdAt: -1 })
     .limit(10);

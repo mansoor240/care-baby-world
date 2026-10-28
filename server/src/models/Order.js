@@ -4,8 +4,9 @@ const orderItemSchema = new mongoose.Schema(
   {
     productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
     variantId: { type: mongoose.Schema.Types.ObjectId, default: null },
-    name: String,
     variantName: { type: String, default: "" },
+    variantSku: { type: String, default: "" },
+    name: String,
     slug: String,
     image: String,
     price: Number,
@@ -13,6 +14,7 @@ const orderItemSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+
 
 const addressSchema = new mongoose.Schema(
   {

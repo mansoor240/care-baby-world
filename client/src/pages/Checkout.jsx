@@ -99,11 +99,13 @@ export default function Checkout() {
       const token = localStorage.getItem("tn_customer_token");
       if (token) headers.Authorization = `Bearer ${token}`;
 
-      const payload = {
+            const payload = {
         customer,
-                items: cart.items.map((i) => ({
+        items: cart.items.map((i) => ({
           productId: i.productId,
           variantId: i.variantId || null,
+          variantName: i.variantName || "",
+          variantSku: i.variantSku || "",
           quantity: i.quantity,
         })),
         paymentMethod: payment,
@@ -221,7 +223,7 @@ export default function Checkout() {
                 <img src={i.image} alt="" className="h-14 w-14 rounded-2xl object-cover" />
                 <div className="flex-1 text-sm">
                   <div className="line-clamp-1 text-ink-900 dark:text-night-50">{i.name}</div>
-                                    <div className="text-xs text-ink-500">
+                                                     <div className="text-xs text-ink-500 dark:text-night-400">
                     Qty {i.quantity} {i.variantName && `· ${i.variantName}`}
                   </div>
                 </div>

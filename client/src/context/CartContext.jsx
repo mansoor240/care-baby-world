@@ -22,6 +22,7 @@ export const useCartStore = create(
         const originalPrice = variant?.originalPrice ?? product.originalPrice;
         const stock = variant?.stock ?? product.stock;
         const variantName = variant?.name || "";
+                const variantSku = variant?.sku || "";
 
         if (existing) {
           const nextQty = Math.min(existing.quantity + qty, stock || 99);
@@ -38,6 +39,7 @@ export const useCartStore = create(
                 key,
                 productId: product._id,
                 variantId,
+                 variantSku,
                 variantName,
                 name: product.name,
                 slug: product.slug,
