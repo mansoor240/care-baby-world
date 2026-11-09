@@ -5,21 +5,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: "#FDFBF7",
+                cream: "#FAF6EE",
         ink: {
           900: "#1F1B24",
           700: "#3B3543",
           500: "#6B6470",
           300: "#A8A2AF",
         },
-        blush: {
-          50: "#FDF2F5",
-          100: "#FBE4EA",
-          200: "#F6C7D3",
-          300: "#EE9FB4",
-          400: "#E2708F",
-          500: "#D14D71",
-        },
+                blush: { 50: "#FBF5F0", 100: "#F5E6D8", 200: "#E8CBB0", 300: "#D4A97F", 400: "#B8835A", 500: "#8F6140" },
         sky: {
           50: "#F0F6FB",
           100: "#DEEEF7",
@@ -66,7 +59,10 @@ export default {
           950: "#0F0F13",
         },
       },
-      borderRadius: { "3xl": "1.5rem", "4xl": "2rem" },
+            borderRadius: {
+        "3xl": "0.375rem",
+        "4xl": "0.5rem",
+      },
       boxShadow: {
         soft: "0 4px 24px -8px rgba(31,27,36,0.08)",
         card: "0 2px 12px -4px rgba(31,27,36,0.06)",

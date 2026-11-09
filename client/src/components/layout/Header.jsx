@@ -24,7 +24,6 @@ export default function Header() {
   const wishlist = useWishlist();
   const { customer, isLoggedIn } = useCustomer();
 
-  // Header scroll effect
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
@@ -35,7 +34,6 @@ export default function Header() {
   const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0);
   const wishCount = wishlist.items.length;
 
-  // Cart bounce effect
   useEffect(() => {
     if (cartCount === 0) return;
     setBounce(true);
@@ -45,11 +43,12 @@ export default function Header() {
 
   const submit = (e) => {
     e.preventDefault();
-    if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`);
+    const term = q.trim();
+    if (term) navigate(`/search?q=${encodeURIComponent(term)}`);
   };
 
   return (
-            <header
+    <header
       className={`sticky top-0 z-40 border-b transition-all duration-300 ${
         scrolled
           ? "border-ink-900/10 bg-cream/95 backdrop-blur shadow-sm dark:border-white/5 dark:bg-night-800/95"
@@ -57,7 +56,7 @@ export default function Header() {
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-                <button
+        <button
           className="md:hidden -ml-1 p-2 text-ink-900 dark:text-night-50"
           onClick={() => setOpen(!open)}
           aria-label="Menu"
@@ -65,7 +64,7 @@ export default function Header() {
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-                        <Link
+        <Link
           to="/"
           onClick={(e) => {
             if (window.location.pathname === "/") {
@@ -80,7 +79,7 @@ export default function Header() {
 
         <nav className="hidden md:flex items-center gap-6 ml-4">
           {NAV.map((n) => (
-                        <NavLink
+            <NavLink
               key={n.to}
               to={n.to}
               className={({ isActive }) =>
@@ -98,23 +97,30 @@ export default function Header() {
 
         <form onSubmit={submit} className="ml-auto hidden md:flex items-center">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
-                        <input
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300"
+            />
+            <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search for products…"
+              placeholder="Search — type A, B, C…"
               className="w-56 lg:w-72 rounded-full border border-ink-900/10 bg-white pl-9 pr-4 py-2 text-sm text-ink-900 placeholder:text-ink-300 focus:border-blush-400 focus:outline-none dark:border-white/10 dark:bg-night-700 dark:text-night-50 dark:placeholder:text-night-400"
             />
           </div>
         </form>
 
-                <div className="ml-auto md:ml-2 flex items-center gap-1">
+        <div className="ml-auto md:ml-2 flex items-center gap-1">
           <ThemeToggle />
           <Link to="/search" className="md:hidden p-2" aria-label="Search">
             <Search size={20} />
           </Link>
 
-                    <Link to="/wishlist" className="relative p-2 text-ink-900 dark:text-night-50" aria-label="Wishlist">
+          <Link
+            to="/wishlist"
+            className="relative p-2 text-ink-900 dark:text-night-50"
+            aria-label="Wishlist"
+          >
             <Heart size={20} />
             {wishCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-blush-400 px-1 text-[10px] font-bold text-white">
@@ -123,7 +129,11 @@ export default function Header() {
             )}
           </Link>
 
-                    <Link to="/cart" className="relative p-2 text-ink-900 dark:text-night-50" aria-label="Cart">
+          <Link
+            to="/cart"
+            className="relative p-2 text-ink-900 dark:text-night-50"
+            aria-label="Cart"
+          >
             <ShoppingBag size={20} />
             {cartCount > 0 && (
               <span
@@ -136,7 +146,7 @@ export default function Header() {
             )}
           </Link>
 
-                    {isLoggedIn ? (
+          {isLoggedIn ? (
             <Link
               to="/account"
               className="hidden md:flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-3 py-1.5 text-sm text-ink-900 hover:bg-cream dark:border-white/10 dark:bg-night-700 dark:text-night-50 dark:hover:bg-night-600 transition"
@@ -156,7 +166,7 @@ export default function Header() {
             </Link>
           )}
 
-                    <Link
+          <Link
             to={isLoggedIn ? "/account" : "/login"}
             className="md:hidden p-2 text-ink-900 dark:text-night-50"
             aria-label="Account"
@@ -172,7 +182,7 @@ export default function Header() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search products…"
+              placeholder="Search — type A, B, C…"
               className="w-full rounded-full border border-ink-900/10 bg-cream px-4 py-2 text-sm focus:outline-none"
             />
           </form>

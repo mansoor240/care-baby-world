@@ -6,43 +6,72 @@ import { Search as SearchIcon, X } from "lucide-react";
 
 export default function Search() {
   const [params, setParams] = useSearchParams();
-  const q = params.get("q") || "";
-  const [input, setInput] = useState(q);
+  const initialQ = params.get("q") || "";
+
+  const [input, setInput] = useState(initialQ);
+  const [debouncedQ, setDebouncedQ] = useState(initialQ);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
 
+  // Sync URL q → input on mount / back-button
   useEffect(() => {
+    const q = params.get("q") || "";
     setInput(q);
-  }, [q]);
+    setDebouncedQ(q);
+  }, [params]);
 
+  // Debounce input → debouncedQ (250ms after last keystroke)
   useEffect(() => {
-    if (!q) {
+    const t = setTimeout(() => {
+      setDebouncedQ(input.trim());
+      // Update URL so refresh/share keeps the query
+      if (input.trim()) setParams({ q: input.trim() }, { replace: true });
+      else setParams({}, { replace: true });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [input, setParams]);
+
+  // Fetch whenever debouncedQ changes
+  useEffect(() => {
+    if (!debouncedQ) {
       setResults([]);
       setTotal(0);
+      setLoading(false);
       return;
     }
+    let cancelled = false;
     setLoading(true);
     api
-      .get("/products", { params: { search: q, limit: 24 } })
+      .get("/products", { params: { search: debouncedQ, limit: 24 } })
       .then((r) => {
+        if (cancelled) return;
         setResults(r.data.items);
         setTotal(r.data.total);
       })
-      .finally(() => setLoading(false));
-  }, [q]);
-
-  const submit = (e) => {
-    e.preventDefault();
-    const trimmed = input.trim();
-    if (trimmed) setParams({ q: trimmed });
-    else setParams({});
-  };
+      .catch(() => {
+        if (cancelled) return;
+        setResults([]);
+        setTotal(0);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQ]);
 
   const clear = () => {
     setInput("");
-    setParams({});
+    setDebouncedQ("");
+    setParams({}, { replace: true });
   };
+
+  const isShort = debouncedQ.length > 0 && debouncedQ.length <= 2;
+  const resultLabel = isShort
+    ? `${total} product${total === 1 ? "" : "s"} starting with`
+    : `${total} result${total === 1 ? "" : "s"} for`;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -56,11 +85,10 @@ export default function Search() {
 
       <h1 className="font-display text-3xl text-ink-900 dark:text-night-50">Search</h1>
       <p className="mt-1 text-sm text-ink-500 dark:text-night-300">
-        Find your favourite baby products.
+        Type anything — results update as you type.
       </p>
 
-      {/* Search input */}
-      <form onSubmit={submit} className="mt-5">
+      <div className="mt-5">
         <div className="relative">
           <SearchIcon
             size={18}
@@ -70,7 +98,7 @@ export default function Search() {
             type="search"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Search for products… e.g. romper, bottle, toys"
+            placeholder="Search — try a letter like A, B, C…"
             autoFocus
             className="w-full rounded-full border border-ink-900/10 bg-white py-3.5 pl-12 pr-12 text-sm text-ink-900 placeholder:text-ink-300 focus:border-blush-400 focus:outline-none dark:border-white/10 dark:bg-night-800 dark:text-night-50 dark:placeholder:text-night-400"
           />
@@ -85,27 +113,32 @@ export default function Search() {
             </button>
           )}
         </div>
-      </form>
+      </div>
 
-      {/* Results */}
       <div className="mt-6">
-        {q && (
+        {debouncedQ && !loading && (
           <p className="mb-4 text-sm text-ink-500 dark:text-night-300">
-            {total} result{total === 1 ? "" : "s"} for{" "}
-            <span className="text-ink-900 font-medium dark:text-night-50">"{q}"</span>
+            {resultLabel}{" "}
+            <span className="text-ink-900 font-medium dark:text-night-50">
+              "{debouncedQ}"
+            </span>
           </p>
         )}
 
         {loading && <ProductGrid loading />}
 
-        {!loading && q && results.length === 0 && (
+        {!loading && debouncedQ && results.length === 0 && (
           <div className="rounded-3xl bg-white p-12 text-center shadow-card animate-[fadeIn_0.4s_ease-out] dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5">
             <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-blush-50 text-4xl dark:bg-blush-400/15">
               🔍
             </div>
-            <h3 className="mt-5 font-display text-xl text-ink-900 dark:text-night-50">No results found</h3>
+            <h3 className="mt-5 font-display text-xl text-ink-900 dark:text-night-50">
+              No products found
+            </h3>
             <p className="mt-2 text-sm text-ink-500 dark:text-night-300">
-              Try different keywords or browse categories.
+              {isShort
+                ? `No products start with "${debouncedQ}". Try another letter.`
+                : `Nothing matched "${debouncedQ}". Try a different word.`}
             </p>
             <Link
               to="/shop"
@@ -116,14 +149,16 @@ export default function Search() {
           </div>
         )}
 
-        {!loading && !q && (
+        {!loading && !debouncedQ && (
           <div className="rounded-3xl bg-white p-12 text-center shadow-card dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5">
             <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-blush-50 text-4xl dark:bg-blush-400/15">
               🔍
             </div>
-            <h3 className="mt-5 font-display text-xl text-ink-900 dark:text-night-50">Start searching</h3>
+            <h3 className="mt-5 font-display text-xl text-ink-900 dark:text-night-50">
+              Start typing
+            </h3>
             <p className="mt-2 text-sm text-ink-500 dark:text-night-300">
-              Type what you're looking for above.
+              Type a letter — products appear instantly below.
             </p>
           </div>
         )}

@@ -13,8 +13,9 @@ export const useCartStore = create(
       //   - an object {_id, name, price, originalPrice, stock, sku, __idx}
       add: (product, qty = 1, variant = "") => {
         const variantId = variant?._id || null;
+               // Priority: sku → name → _id → index → "base"
         const variantTag =
-          variantId || variant?.sku || variant?.name || variant?.__idx || "base";
+          variant?.sku || variant?.name || variantId || variant?.__idx || "base";
         const key = `${product._id}::${variantTag}`;
         const existing = get().items.find((i) => i.key === key);
 

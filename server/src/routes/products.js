@@ -3,62 +3,85 @@ import Product from "../models/Product.js";
 
 const router = Router();
 
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // GET /api/products?search=&category=&minPrice=&maxPrice=&age=&sort=&page=&limit=&featured=&bestseller=
 router.get("/", async (req, res) => {
-  const {
-    search = "",
-    category = "",
-    minPrice,
-    maxPrice,
-    age,
-    sort = "popular",
-    page = 1,
-    limit = 12,
-    featured,
-    bestseller,
-  } = req.query;
+  try {
+    const {
+      search = "",
+      category = "",
+      minPrice,
+      maxPrice,
+      age,
+      sort = "popular",
+      page = 1,
+      limit = 12,
+      featured,
+      bestseller,
+    } = req.query;
 
     const filter = {};
 
-  if (search && search.trim()) {
-    const rx = new RegExp(search.trim(), "i");
-    filter.$or = [
-      { name: rx },
-      { description: rx },
-      { brand: rx },
-      { tags: rx },
-    ];
+    if (search && search.trim()) {
+      const term = search.trim();
+      const rx = new RegExp(
+        (term.length <= 2 ? "^" : "") + escapeRegex(term),
+        "i"
+      );
+      // 1–2 chars  → starts-with (prefix) on name/brand/tags
+      // 3+ chars   → contains on name/description/brand/tags
+      if (term.length <= 2) {
+        filter.$or = [{ name: rx }, { brand: rx }, { tags: rx }];
+      } else {
+        filter.$or = [
+          { name: rx },
+          { description: rx },
+          { brand: rx },
+          { tags: rx },
+        ];
+      }
+    }
+
+    if (category) filter.categorySlug = category;
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+    if (age) filter.ageRange = { $regex: escapeRegex(age), $options: "i" };
+    if (featured === "true") filter.featured = true;
+    if (bestseller === "true") filter.bestseller = true;
+
+    const sortMap = {
+      popular: { rating: -1, reviewCount: -1 },
+      newest: { createdAt: -1 },
+      priceAsc: { price: 1 },
+      priceDesc: { price: -1 },
+    };
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [items, total] = await Promise.all([
+      Product.find(filter)
+        .sort(sortMap[sort] || sortMap.popular)
+        .skip(skip)
+        .limit(Number(limit)),
+      Product.countDocuments(filter),
+    ]);
+
+    res.json({
+      items,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / Number(limit)),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not fetch products" });
   }
-  if (category) filter.categorySlug = category;
-  if (minPrice || maxPrice) {
-    filter.price = {};
-    if (minPrice) filter.price.$gte = Number(minPrice);
-    if (maxPrice) filter.price.$lte = Number(maxPrice);
-  }
-  if (age) filter.ageRange = { $regex: age, $options: "i" };
-  if (featured === "true") filter.featured = true;
-  if (bestseller === "true") filter.bestseller = true;
-
-  const sortMap = {
-    popular: { rating: -1, reviewCount: -1 },
-    newest: { createdAt: -1 },
-    priceAsc: { price: 1 },
-    priceDesc: { price: -1 },
-  };
-
-  const skip = (Number(page) - 1) * Number(limit);
-
-  const [items, total] = await Promise.all([
-    Product.find(filter).sort(sortMap[sort] || sortMap.popular).skip(skip).limit(Number(limit)),
-    Product.countDocuments(filter),
-  ]);
-
-  res.json({
-    items,
-    total,
-    page: Number(page),
-    pages: Math.ceil(total / Number(limit)),
-  });
 });
 
 router.get("/slug/:slug", async (req, res) => {

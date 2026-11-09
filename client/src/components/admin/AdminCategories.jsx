@@ -11,6 +11,7 @@ export default function AdminCategories() {
   const load = () => api.get("/admin/categories").then((r) => setItems(r.data));
   useEffect(() => { load(); }, []);
 
+
   const save = async () => {
     try {
       if (editing._id) await api.put(`/admin/categories/${editing._id}`, editing);
