@@ -1,56 +1,110 @@
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import api from "../api/client";
 import { storeConfig } from "../config/store";
 
-const CONTENT = {
-  privacy: {
-    title: "Privacy Policy",
-    body: `This is a placeholder Privacy Policy. Replace it with a policy that reflects your actual data practices.
-
-We collect the minimum information required to fulfil your order — your name, mobile number, delivery address, and optionally your email. We do not sell your data to third parties.
-
-For questions, contact us at ${storeConfig.email}.`,
-  },
-  terms: {
-    title: "Terms & Conditions",
-    body: `This is a placeholder Terms & Conditions page. Replace with terms reviewed by your legal advisor.
-
-By placing an order on ${storeConfig.name}, you agree to provide accurate delivery information and to pay the total amount shown at checkout.`,
-  },
-  shipping: {
-    title: "Shipping Policy",
-    body: `Delivery is available in and around ${storeConfig.address.city}. Estimated delivery: ${storeConfig.estimatedDelivery}.
-
-Free delivery on orders above ${storeConfig.currency}${storeConfig.freeDeliveryThreshold}. A delivery fee of ${storeConfig.currency}${storeConfig.deliveryFee} applies below this threshold.`,
-  },
-  returns: {
-    title: "Return & Refund Policy",
-    body: `Placeholder Return & Refund Policy. Replace with your actual policy.
-
-Unused products in original packaging may be returned within 7 days of delivery. Refunds are processed to the original payment method within 5–7 business days.`,
-  },
+const TITLES = {
+  shipping: "Shipping Policy",
+  returns: "Return & Refund Policy",
+  privacy: "Privacy Policy",
+  terms: "Terms & Conditions",
 };
 
 export default function Policies() {
   const { slug } = useParams();
-  const doc = CONTENT[slug];
+  const [content, setContent] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!doc) {
+  useEffect(() => {
+    if (!TITLES[slug]) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setNotFound(false);
+    api
+      .get(`/settings/policies/${slug}`)
+      .then((r) => {
+        setContent(r.data.content || "");
+        setLastUpdated(r.data.lastUpdated);
+        document.title = `${TITLES[slug]} — ${storeConfig.name}`;
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="skeleton h-8 w-1/3 rounded-2xl" />
+        <div className="mt-4 space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="skeleton h-4 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center">
-        <h1 className="font-display text-2xl text-ink-900 dark:text-night-50">Page not found</h1>
-        <Link to="/" className="mt-3 inline-block text-blush-500 dark:text-blush-300">← Back home</Link>
+        <h1 className="font-display text-2xl text-ink-900 dark:text-night-50">
+          Policy not available
+        </h1>
+        <p className="mt-2 text-sm text-ink-500 dark:text-night-300">
+          This policy hasn't been published yet. Please check back later.
+        </p>
+        <Link
+          to="/"
+          className="mt-6 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white dark:bg-blush-500"
+        >
+          Back to home
+        </Link>
       </div>
     );
   }
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="font-display text-3xl text-ink-900 dark:text-night-50">{doc.title}</h1>
-      <p className="mt-2 text-xs text-ink-500 dark:text-night-400">
-        ⚠️ Placeholder content — replace with your own legal text before going live.
-      </p>
+      <nav className="text-xs text-ink-500 dark:text-night-400">
+        <Link
+          to="/"
+          className="hover:text-ink-900 transition dark:hover:text-night-50"
+        >
+          Home
+        </Link>
+        <span className="mx-1.5">/</span>
+        <span className="text-ink-900 dark:text-night-50">{TITLES[slug]}</span>
+      </nav>
+
+      <h1 className="mt-4 font-display text-3xl text-ink-900 dark:text-night-50">
+        {TITLES[slug]}
+      </h1>
+      {lastUpdated && (
+        <p className="mt-2 text-xs text-ink-500 dark:text-night-400">
+          Last updated:{" "}
+          {new Date(lastUpdated).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+      )}
+
       <div className="prose mt-6 whitespace-pre-line text-sm leading-relaxed text-ink-700 dark:text-night-100">
-        {doc.body}
+        {content}
+      </div>
+
+      <div className="mt-10 rounded-2xl bg-sand-50 p-5 text-sm dark:bg-night-800 dark:ring-1 dark:ring-white/5">
+        <p className="text-ink-700 dark:text-night-100">
+          Questions? Message us on WhatsApp at{" "}
+          <span className="font-medium">{storeConfig.phone}</span> or email{" "}
+          <span className="font-medium">{storeConfig.email}</span>.
+        </p>
       </div>
     </article>
   );
