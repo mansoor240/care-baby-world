@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../api/client";
 import ProductGrid from "../components/product/ProductGrid";
+import { getCategoryIcon } from "../components/categoryIcons";
 
 export default function Category() {
   const { slug } = useParams();
@@ -33,16 +34,29 @@ export default function Category() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <nav className="text-xs text-ink-500 dark:text-night-400">
-        <Link to="/" className="hover:text-ink-900 transition dark:hover:text-night-50">Home</Link>
+        <Link to="/" className="hover:text-ink-900 transition dark:hover:text-night-50">
+          Home
+        </Link>
         <span className="mx-1.5">/</span>
-        <span className="text-ink-900 dark:text-night-50">{category?.name || "Category"}</span>
+        <span className="text-ink-900 dark:text-night-50">
+          {category?.name || "Category"}
+        </span>
       </nav>
 
       <header className="mt-4 rounded-4xl bg-gradient-to-r from-blush-50 to-sand-50 p-8 dark:from-night-700 dark:to-night-800">
-        <h1 className="font-display text-3xl text-ink-900 dark:text-night-50">
-          {category?.emoji} {category?.name}
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-ink-500 dark:text-night-300">{category?.description}</p>
+        <div className="flex items-center gap-4">
+          <div className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-white text-blush-500 shadow-card dark:bg-night-700 dark:text-blush-300">
+            {category && getCategoryIcon(category.icon || category.slug)}
+          </div>
+          <div>
+            <h1 className="font-display text-3xl text-ink-900 dark:text-night-50">
+              {category?.name}
+            </h1>
+            <p className="mt-1 max-w-2xl text-sm text-ink-500 dark:text-night-300">
+              {category?.description}
+            </p>
+          </div>
+        </div>
       </header>
 
       <div className="mt-6 flex items-center justify-between">
@@ -62,10 +76,12 @@ export default function Category() {
       <div className="mt-6">
         {!loading && products.length === 0 ? (
           <div className="rounded-3xl bg-white p-12 text-center shadow-card dark:bg-night-800 dark:shadow-none dark:ring-1 dark:ring-white/5">
-            <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-5xl dark:bg-blush-400/15">
-              🌱
+            <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blush-50 text-blush-500 dark:bg-blush-400/15 dark:text-blush-300">
+              {category && getCategoryIcon(category.icon || category.slug)}
             </div>
-            <h3 className="mt-6 font-display text-2xl text-ink-900 dark:text-night-50">Coming soon</h3>
+            <h3 className="mt-6 font-display text-2xl text-ink-900 dark:text-night-50">
+              Coming soon
+            </h3>
             <p className="mt-2 max-w-md mx-auto text-sm text-ink-500 dark:text-night-300">
               We're adding products to <strong>{category?.name || "this category"}</strong>.
               Check back soon or explore other categories.
