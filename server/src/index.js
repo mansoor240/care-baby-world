@@ -9,6 +9,7 @@ import ordersRouter from "./routes/orders.js";
 import couponsRouter from "./routes/coupons.js";
 import authRouter from "./routes/auth.js";
 import adminRouter from "./routes/admin.js";
+import settingsRouter from "./routes/settings.js";
 import faqsRouter from "./routes/faqs.js";
 import adminFaqsRouter from "./routes/admin-faqs.js";
 import customersRouter from "./routes/customers.js";
@@ -29,6 +30,7 @@ app.use("/api/coupons", couponsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/customers", customersRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/settings", settingsRouter);
 app.use("/api/faqs", faqsRouter);
 app.use("/api/admin-faqs", adminFaqsRouter);
 

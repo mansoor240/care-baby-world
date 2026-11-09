@@ -43,6 +43,7 @@ import AdminProducts from "./components/admin/AdminProducts";
 import AdminOrders from "./components/admin/AdminOrders";
 import AdminCategories from "./components/admin/AdminCategories";
 import AdminCoupons from "./components/admin/AdminCoupons";
+import AdminSettings from "./components/admin/AdminSettings";
 import AdminFAQs from "./components/admin/AdminFAQs";
 import AdminQuestions from "./components/admin/AdminQuestions";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -123,6 +124,7 @@ export default function App() {
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="coupons" element={<AdminCoupons />} />
+                                  <Route path="settings" element={<AdminSettings />} />
                 <Route path="faqs" element={<AdminFAQs />} />
                 <Route path="questions" element={<AdminQuestions />} />
               </Route>

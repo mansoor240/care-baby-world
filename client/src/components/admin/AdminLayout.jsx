@@ -9,6 +9,7 @@ import {
   LogOut,
   HelpCircle,
   MessageSquare,
+  Settings as SettingsIcon,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -33,6 +34,7 @@ export default function AdminLayout() {
     { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
     { to: "/admin/categories", label: "Categories", icon: FolderTree },
     { to: "/admin/coupons", label: "Coupons", icon: Ticket },
+      { to: "/admin/settings", label: "Settings", icon: SettingsIcon },
     { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
     { to: "/admin/questions", label: "Questions", icon: MessageSquare },
   ];

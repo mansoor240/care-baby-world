@@ -30,6 +30,7 @@ export default function Home() {
   const [bestsellers, setBestsellers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [homeOffer, setHomeOffer] = useState(null);
 
   const featuredRef = useRef(null);
   const featuredScroll = useScroll({
@@ -44,11 +45,13 @@ export default function Home() {
       api.get("/products", { params: { featured: true, limit: 8 } }),
       api.get("/products", { params: { bestseller: true, limit: 8 } }),
       api.get("/categories"),
+      api.get("/settings/home-offer").catch(() => ({ data: { coupon: null } })),
     ])
-      .then(([f, b, c]) => {
+      .then(([f, b, c, o]) => {
         setFeatured(f.data.items);
         setBestsellers(b.data.items);
         setCategories(c.data);
+        setHomeOffer(o.data.coupon || null);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -131,42 +134,55 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ─── OFFER BANNER ───────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.5 }}
-          className="overflow-hidden rounded-4xl bg-gradient-to-r from-lavender-100 via-blush-100 to-sand-100 p-8 md:p-12 dark:from-night-700 dark:via-night-800 dark:to-night-700"
-        >
-          <div className="grid gap-6 md:grid-cols-2 md:items-center">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-blush-500 dark:text-blush-300">
-                Limited Time
+          {/* ─── OFFER BANNER (admin-controlled) ─────────── */}
+      {homeOffer && (
+        <section className="mx-auto max-w-7xl px-4 py-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="overflow-hidden rounded-4xl bg-gradient-to-r from-lavender-100 via-blush-100 to-sand-100 p-8 md:p-12 dark:from-night-700 dark:via-night-800 dark:to-night-700"
+          >
+            <div className="grid gap-6 md:grid-cols-2 md:items-center">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-blush-500 dark:text-blush-300">
+                  Limited Time
+                </div>
+                <h3 className="mt-2 font-display text-3xl text-ink-900 dark:text-night-50">
+                  Use code{" "}
+                  <span className="text-blush-500 dark:text-blush-300">
+                    {homeOffer.code}
+                  </span>
+                </h3>
+                <p className="mt-2 text-ink-500 dark:text-night-300">
+                  Get{" "}
+                  {homeOffer.type === "percentage"
+                    ? `${homeOffer.value}% off`
+                    : `₹${homeOffer.value} off`}
+                  {homeOffer.minOrderAmount > 0
+                    ? ` on orders above ₹${homeOffer.minOrderAmount}.`
+                    : "."}{" "}
+                  Applicable at checkout.
+                </p>
+                <Link
+                  to="/shop"
+                  className="mt-5 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-all hover:shadow-soft hover:-translate-y-0.5 active:scale-95 dark:bg-blush-500 dark:hover:bg-blush-400"
+                >
+                  Shop the offer
+                </Link>
               </div>
-              <h3 className="mt-2 font-display text-3xl text-ink-900 dark:text-night-50">
-                Use code <span className="text-blush-500 dark:text-blush-300">WELCOME10</span>
-              </h3>
-              <p className="mt-2 text-ink-500 dark:text-night-300">
-                Get 10% off your first order above ₹499. Applicable at checkout.
-              </p>
-              <Link
-                to="/shop"
-                className="mt-5 inline-flex rounded-full bg-ink-900 px-6 py-3 text-sm font-medium text-white hover:bg-ink-700 transition-all hover:shadow-soft hover:-translate-y-0.5 active:scale-95 dark:bg-blush-500 dark:hover:bg-blush-400"
-              >
-                Shop the offer
-              </Link>
+              <div className="rounded-3xl bg-white/70 p-6 text-center backdrop-blur transition-transform duration-500 hover:scale-105 dark:bg-night-800/70">
+                <div className="text-6xl">🎁</div>
+                <p className="mt-3 text-sm text-ink-700 dark:text-night-100">
+                  Free delivery on orders above {storeConfig.currency}
+                  {storeConfig.freeDeliveryThreshold}
+                </p>
+              </div>
             </div>
-            <div className="rounded-3xl bg-white/70 p-6 text-center backdrop-blur transition-transform duration-500 hover:scale-105 dark:bg-night-800/70">
-              <div className="text-6xl">🎁</div>
-              <p className="mt-3 text-sm text-ink-700 dark:text-night-100">
-                Free delivery on orders above {storeConfig.currency}{storeConfig.freeDeliveryThreshold}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      </section>
+          </motion.div>
+        </section>
+      )}
 
       {/* ─── WHY US ─────────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-12">
