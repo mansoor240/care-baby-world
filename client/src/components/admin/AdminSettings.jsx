@@ -220,7 +220,7 @@ export default function AdminSettings() {
               </label>
 
               <p className="mt-2 text-xs text-ink-400">
-                Line breaks are preserved. Use plain text — no HTML.
+                
               </p>
             </div>
 
