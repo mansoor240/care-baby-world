@@ -10,14 +10,29 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [selected, setSelected] = useState(null);
 
-  const load = () => api.get("/admin/orders").then((r) => setOrders(r.data));
-  useEffect(() => { load(); }, []);
+  const load = async () => {
+    try {
+      const r = await api.get("/admin/orders");
+      setOrders(r.data || []);
+    } catch (err) {
+      toast.error("Could not load orders");
+      setOrders([]);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
 
   const updateStatus = async (id, status) => {
-    await api.put(`/admin/orders/${id}/status`, { status });
-    toast.success("Status updated");
-    load();
-    if (selected?._id === id) setSelected({ ...selected, status });
+    try {
+      await api.put(`/admin/orders/${id}/status`, { status });
+      toast.success("Status updated");
+      load();
+      if (selected?._id === id) setSelected({ ...selected, status });
+    } catch {
+      toast.error("Could not update status");
+    }
   };
 
   const deleteOrder = async (order) => {
@@ -62,8 +77,8 @@ export default function AdminOrders() {
                   <div className="text-xs text-ink-500">{formatDate(o.createdAt)}</div>
                 </td>
                 <td className="p-3">
-                  <div>{o.customer.fullName}</div>
-                  <div className="text-xs text-ink-500">{o.customer.mobile}</div>
+                  <div>{o.customer?.fullName || "—"}</div>
+                  <div className="text-xs text-ink-500">{o.customer?.mobile || ""}</div>
                 </td>
                 <td className="p-3 font-medium">{formatPrice(o.total)}</td>
                 <td className="p-3 text-xs uppercase">{o.paymentMethod}</td>
@@ -107,8 +122,8 @@ export default function AdminOrders() {
               <div className="text-right text-sm font-semibold">{formatPrice(o.total)}</div>
             </div>
             <div className="mt-2 text-sm">
-              <div>{o.customer.fullName}</div>
-              <div className="text-xs text-ink-500">{o.customer.mobile}</div>
+              <div>{o.customer?.fullName || "—"}</div>
+              <div className="text-xs text-ink-500">{o.customer?.mobile || ""}</div>
             </div>
             <div className="mt-3">
               <select
@@ -144,25 +159,29 @@ export default function AdminOrders() {
         )}
       </div>
 
-      {/* Detail modal — full-screen on mobile */}
+      {/* Detail modal — guaranteed to render */}
       {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 sm:grid sm:place-items-center sm:p-4"
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="flex h-[95vh] w-full flex-col rounded-t-3xl bg-white sm:h-auto sm:max-h-[90vh] sm:max-w-xl sm:rounded-3xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-ink-900/60 p-0 sm:items-center sm:p-4">
+          <div className="flex h-full w-full flex-col bg-white sm:h-auto sm:max-h-[90vh] sm:max-w-xl sm:rounded-3xl">
+            {/* Sticky header */}
             <div className="flex shrink-0 items-center justify-between border-b border-ink-900/5 px-4 py-3 sm:px-6 sm:py-4">
               <h2 className="font-display text-lg sm:text-xl">{selected.orderNumber}</h2>
-              <button onClick={() => setSelected(null)} className="p-1 text-ink-500" aria-label="Close">✕</button>
+              <button
+                onClick={() => setSelected(null)}
+                className="rounded-full p-2 text-ink-500 hover:bg-cream"
+                aria-label="Close"
+              >
+                ✕
+              </button>
             </div>
 
+            {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
               {selected.status === "cancelled" && (
                 <div className="rounded-2xl bg-red-50 p-3">
-                  <p className="text-xs text-red-700">⚠️ This order is cancelled. You can delete it permanently.</p>
+                  <p className="text-xs text-red-700">
+                    ⚠️ This order is cancelled. You can delete it permanently.
+                  </p>
                   <button
                     onClick={() => deleteOrder(selected)}
                     className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-red-500 py-2 text-xs font-medium text-white hover:bg-red-600 transition"
@@ -173,33 +192,74 @@ export default function AdminOrders() {
               )}
 
               <div className="mt-4 text-sm">
-                <div className="font-semibold">{selected.customer.fullName}</div>
-                <div className="text-ink-500">{selected.customer.mobile}</div>
+                <div className="font-semibold">{selected.customer?.fullName || "—"}</div>
+                <div className="text-ink-500">{selected.customer?.mobile || ""}</div>
                 <div className="text-ink-500">
-                  {selected.customer.house}, {selected.customer.street}, {selected.customer.city}, {selected.customer.state} — {selected.customer.pincode}
+                  {[
+                    selected.customer?.house,
+                    selected.customer?.street,
+                    selected.customer?.city,
+                    selected.customer?.state,
+                    selected.customer?.pincode,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
                 </div>
               </div>
+
               <ul className="mt-4 space-y-2">
-                {selected.items.map((i) => (
-                  <li key={i.productId + (i.variantId || i.variant || "")} className="flex gap-3 text-sm">
-                    <img src={i.image} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                {(selected.items || []).map((i, idx) => (
+                  <li
+                    key={`${i.productId || idx}-${i.variantId || i.variant || ""}`}
+                    className="flex gap-3 text-sm"
+                  >
+                    {i.image ? (
+                      <img src={i.image} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                    ) : (
+                      <div className="grid h-12 w-12 place-items-center rounded-xl bg-cream text-xs">
+                        —
+                      </div>
+                    )}
                     <div className="flex-1">
-                      <div>{i.name}</div>
+                      <div>{i.name || "Item"}</div>
                       <div className="text-xs text-ink-500">
-                        Qty {i.quantity}
+                        Qty {i.quantity || 1}
                         {i.variantName && ` · ${i.variantName}`}
                       </div>
                     </div>
-                    <div>{formatPrice(i.price * i.quantity)}</div>
+                    <div>{formatPrice((i.price || 0) * (i.quantity || 1))}</div>
                   </li>
                 ))}
               </ul>
+
               <div className="mt-4 border-t border-ink-900/10 pt-3 text-sm">
-                <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(selected.subtotal)}</span></div>
-                <div className="flex justify-between"><span>Discount</span><span>− {formatPrice(selected.discount)}</span></div>
-                <div className="flex justify-between"><span>Delivery</span><span>{selected.deliveryFee === 0 ? "Free" : formatPrice(selected.deliveryFee)}</span></div>
-                <div className="flex justify-between font-semibold"><span>Total</span><span>{formatPrice(selected.total)}</span></div>
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(selected.subtotal || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Discount</span>
+                  <span>− {formatPrice(selected.discount || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Delivery</span>
+                  <span>{selected.deliveryFee === 0 ? "Free" : formatPrice(selected.deliveryFee || 0)}</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span>{formatPrice(selected.total || 0)}</span>
+                </div>
               </div>
+            </div>
+
+            {/* Sticky footer — Close button always visible on mobile */}
+            <div className="flex shrink-0 border-t border-ink-900/5 bg-white px-4 py-3 sm:hidden">
+              <button
+                onClick={() => setSelected(null)}
+                className="w-full rounded-full bg-ink-900 py-2.5 text-sm font-medium text-white"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
