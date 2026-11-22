@@ -42,18 +42,13 @@ export default function Home() {
 
   useEffect(() => {
     Promise.all([
-      api.get("/products", { params: { featured: true, limit: 8 } }),
-      api.get("/products", { params: { bestseller: true, limit: 8 } }),
-      api.get("/categories"),
-      api.get("/settings/home-offer").catch(() => ({ data: { coupon: null } })),
-    ])
-      .then(([f, b, c, o]) => {
-        setFeatured(f.data.items);
-        setBestsellers(b.data.items);
-        setCategories(c.data);
-        setHomeOffer(o.data.coupon || null);
-      })
-      .finally(() => setLoading(false));
+      api.get("/home")
+  .then((r) => {
+    setFeatured(r.data.featuredProducts);
+    setBestsellers(r.data.bestSellers);
+    setCategories(r.data.categories);
+  })
+  .finally(() => setLoading(false));
   }, []);
 
   return (

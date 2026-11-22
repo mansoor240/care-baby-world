@@ -104,4 +104,20 @@ router.get("/:id", async (req, res) => {
   res.json(product);
 });
 
+
+// Inside your products router (or a new /home router)
+// This runs the 3 queries in PARALLEL, not one after another
+router.get("/home", async (req, res) => {
+  try {
+    const [categories, featured, bestsellers] = await Promise.all([
+      Category.find().sort({ order: 1, name: 1 }).lean(),
+      Product.find({ featured: true }).limit(8).lean(),
+      Product.find({ bestseller: true }).limit(8).lean(),
+    ]);
+
+    res.json({ categories, featuredProducts: featured, bestSellers: bestsellers });
+  } catch (err) {
+    res.status(500).json({ error: "Could not load home data" });
+  }
+});
 export default router;
