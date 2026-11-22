@@ -5,13 +5,15 @@ import rateLimit from "express-rate-limit";
 const router = Router();
 
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per IP per window
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: { error: "Too many login attempts. Try again in 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip successful logins from counting against the limit
   skipSuccessfulRequests: true,
+  keyGenerator: (req) => {
+    return req.headers["cf-connecting-ip"] || req.ip;
+  },
 });
 
 router.post("/admin-login", loginLimiter, (req, res) => {
