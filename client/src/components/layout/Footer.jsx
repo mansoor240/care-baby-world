@@ -3,9 +3,7 @@ import { storeConfig } from "../../config/store";
 
 export default function Footer() {
   const fullAddress = `${storeConfig.address.line1}, ${storeConfig.address.area}, ${storeConfig.address.city}, ${storeConfig.address.state} — ${storeConfig.address.pincode}`;
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    fullAddress
-  )}`;
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=Care+Baby+Store,11-3-873/1+Backside+Badie+Masjid+New+Mallepally+Hyderabad+Telangana+500001`;
   const phoneTel = storeConfig.phone.replace(/[^\d+]/g, "");
 
   return (
@@ -99,7 +97,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-ink-900 dark:hover:text-night-50 transition"
-              >
+              > 
                 {storeConfig.address.line1}, {storeConfig.address.area}
                 <br />
                 {storeConfig.address.city}, {storeConfig.address.state} —{" "}
