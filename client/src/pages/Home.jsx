@@ -59,10 +59,10 @@ export default function Home() {
   return (
     <div>
       {/* ─── SCROLL SHOWCASE (Cinematic Top) ─────────── */}
-      <ScrollShowcase />
+            <ScrollShowcase key="showcase" />
 
       {/* ─── CATEGORIES ─────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-12">
+            <section className="mx-auto max-w-7xl px-4 py-12">
         <motion.div
           initial="hidden"
           whileInView="show"
@@ -75,6 +75,7 @@ export default function Home() {
         </motion.div>
 
         <motion.div
+          key={`cats-${categories.length}`}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}

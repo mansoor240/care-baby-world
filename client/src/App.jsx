@@ -51,7 +51,16 @@ import AdminLayout from "./components/admin/AdminLayout";
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
+    // Disable browser scroll restoration so back-button starts at top
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
     window.scrollTo(0, 0);
+    // Re-trigger any IntersectionObserver reveals after layout
+    const t = setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 60);
+    return () => clearTimeout(t);
   }, [pathname]);
   return null;
 }
@@ -81,6 +90,7 @@ function StoreLayout({ children }) {
 
 export default function App() {
   useReveal();
+  const location = useLocation();
   return (
      <ThemeProvider>
       <Preloader />
@@ -90,7 +100,7 @@ export default function App() {
         <CartProvider>
           <WishlistProvider>
             <ScrollToTop />
-            <Routes>
+                        <Routes key={location.pathname}>
               {/* Store */}
               <Route path="/" element={<StoreLayout><Home /></StoreLayout>} />
               <Route path="/shop" element={<StoreLayout><Shop /></StoreLayout>} />

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+
 
 const router = Router();
 
@@ -11,9 +12,9 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
-  keyGenerator: (req) => {
-    // Use Cloudflare's real client IP header first, fall back to req.ip
-    return req.headers["cf-connecting-ip"] || req.ip;
+    keyGenerator: (req) => {
+    const ip = req.headers["cf-connecting-ip"] || req.ip || "unknown";
+    return ipKeyGenerator(ip);
   },
 });
 
