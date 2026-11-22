@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate, useNavigationType } from "react-router-dom";
 import { useEffect } from "react";
 import { useReveal } from "./hooks/useReveal";
 import PageTransition from "./components/PageTransition";
@@ -50,18 +50,22 @@ import AdminLayout from "./components/admin/AdminLayout";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
+  const navigationType = useNavigationType();
+
   useEffect(() => {
-    // Disable browser scroll restoration so back-button starts at top
-    if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
+    // Only scroll to top on PUSH or REPLACE (forward navigation)
+    // Do NOT scroll on POP (back/forward button) — let the browser restore position
+    if (navigationType !== "POP") {
+      window.scrollTo(0, 0);
     }
-    window.scrollTo(0, 0);
-    // Re-trigger any IntersectionObserver reveals after layout
+
+    // Re-trigger IntersectionObserver reveals after layout (needed for back button)
     const t = setTimeout(() => {
       window.dispatchEvent(new Event("resize"));
     }, 60);
     return () => clearTimeout(t);
-  }, [pathname]);
+  }, [pathname, navigationType]);
+
   return null;
 }
 
