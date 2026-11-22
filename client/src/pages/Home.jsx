@@ -8,7 +8,7 @@ import ScrollShowcase from "../components/ScrollShowcase";
 import ScrollRevealText from "../components/ScrollRevealText";
 import { storeConfig } from "../config/store";
 import { whatsappLink, whatsappMessages } from "../lib/whatsapp";
-import { MessageCircle, Truck, ShieldCheck, RotateCcw, HeartHandshake } from "lucide-react";
+import { MessageCircle, Truck, ShieldCheck, RotateCcw, HeartHandshake, Gift } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -173,12 +173,19 @@ export default function Home() {
                 </Link>
               </div>
               <div className="rounded-3xl bg-white/70 p-6 text-center backdrop-blur transition-transform duration-500 hover:scale-105 dark:bg-night-800/70">
-                <div className="text-6xl">🎁</div>
-                <p className="mt-3 text-sm text-ink-700 dark:text-night-100">
-                  Free delivery on orders above {storeConfig.currency}
-                  {storeConfig.freeDeliveryThreshold}
-                </p>
-              </div>
+  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blush-100 dark:bg-night-700">
+    <Gift
+      size={32}
+      strokeWidth={1.5}
+      className="text-blush-500 dark:text-blush-300"
+    />
+  </div>
+
+  <p className="mt-4 text-sm font-medium text-ink-700 dark:text-night-100">
+    Free delivery on orders above {storeConfig.currency}
+    {storeConfig.freeDeliveryThreshold}
+  </p>
+</div>
             </div>
           </motion.div>
         </section>
