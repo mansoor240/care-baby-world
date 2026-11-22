@@ -41,15 +41,18 @@ export default function Home() {
   const featuredScale = useTransform(featuredScroll.scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
 
   useEffect(() => {
-    api
-      .get("/home")
-      .then((r) => {
-        setFeatured(r.data.featuredProducts || []);
-        setBestsellers(r.data.bestSellers || []);
-        setCategories(r.data.categories || []);
-        setHomeOffer(r.data.homeOffer || null);
+    Promise.all([
+      api.get("/products", { params: { featured: true, limit: 8 } }),
+      api.get("/products", { params: { bestseller: true, limit: 8 } }),
+      api.get("/categories"),
+      api.get("/settings/home-offer").catch(() => ({ data: { coupon: null } })),
+    ])
+      .then(([f, b, c, o]) => {
+        setFeatured(f.data.items);
+        setBestsellers(b.data.items);
+        setCategories(c.data);
+        setHomeOffer(o.data.coupon || null);
       })
-      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -110,7 +113,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ─── BESTSELLERS (grid) ─────────────────────── */}
+            {/* ─── BESTSELLERS (grid) ─────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-8">
         <motion.div
           initial="hidden"
@@ -131,7 +134,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ─── OFFER BANNER (admin-controlled) ─────────── */}
+          {/* ─── OFFER BANNER (admin-controlled) ─────────── */}
       {homeOffer && (
         <section className="mx-auto max-w-7xl px-4 py-8">
           <motion.div
