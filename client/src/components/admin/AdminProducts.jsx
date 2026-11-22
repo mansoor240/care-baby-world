@@ -51,12 +51,16 @@ export default function AdminProducts() {
   const [batchMode, setBatchMode] = useState(false);
 
   const load = async () => {
-    const [p, c] = await Promise.all([
-      api.get("/admin/products"),
-      api.get("/admin/categories"),
-    ]);
-    setProducts(p.data);
-    setCategories(c.data);
+    try {
+      const [p, c] = await Promise.all([
+        api.get("/admin/products"),
+        api.get("/admin/categories"),
+      ]);
+      setProducts(p.data || []);
+      setCategories(c.data || []);
+    } catch (err) {
+      toast.error("Could not load products");
+    }
   };
 
   useEffect(() => {
@@ -67,15 +71,21 @@ export default function AdminProducts() {
     setEditing({ ...empty });
     setShowForm(true);
   };
+
   const openEdit = (p) => {
     setEditing({
       ...empty,
       ...p,
       images: p.images || [],
-      hasVariants: p.hasVariants || false,
+      hasVariants: p.hasVariants || (p.variants?.length > 0) || false,
       variants: p.variants || [],
     });
     setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditing(null);
   };
 
   const save = async () => {
@@ -109,14 +119,13 @@ export default function AdminProducts() {
           return;
         }
       } else {
-        // Simple product: strip variants so server doesn't mis-calc
         payload.variants = [];
       }
 
       if (editing._id) await api.put(`/admin/products/${editing._id}`, payload);
       else await api.post("/admin/products", payload);
       toast.success("Saved");
-      setShowForm(false);
+      closeForm();
       load();
     } catch (e) {
       toast.error(e.response?.data?.error || "Save failed");
@@ -201,7 +210,6 @@ export default function AdminProducts() {
         </div>
       </div>
 
-      {/* Alerts */}
       {(lowStock.length > 0 ||
         outOfStock.length > 0 ||
         variantsOut.length > 0 ||
@@ -253,7 +261,7 @@ export default function AdminProducts() {
       {batchMode && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-blush-50 p-4">
           <div className="text-sm text-ink-700">
-            Edit stock for <strong>simple products</strong> below. Variant products must be edited individually. Click <strong>Save All</strong>.
+            Edit stock for <strong>simple products</strong> below. Variant products must be edited individually.
           </div>
           <div className="flex gap-2">
             <button
@@ -274,7 +282,7 @@ export default function AdminProducts() {
         </div>
       )}
 
-            {/* Desktop table */}
+      {/* Desktop table */}
       <div className="mt-6 hidden overflow-hidden rounded-3xl bg-white shadow-card md:block">
         <table className="w-full text-sm">
           <thead className="bg-cream text-left text-xs text-ink-500">
@@ -291,7 +299,6 @@ export default function AdminProducts() {
             {products.map((p) => {
               const isLow = p.stock > 0 && p.stock < 10;
               const isOut = p.stock === 0;
-              const editValue = stockEdits[p._id] ?? p.stock;
               return (
                 <tr key={p._id} className="border-t border-ink-900/5">
                   <td className="p-3">
@@ -400,7 +407,7 @@ export default function AdminProducts() {
           categories={categories}
           onChange={setEditing}
           onSave={save}
-          onClose={() => setShowForm(false)}
+          onClose={closeForm}
           busy={busy}
         />
       )}
@@ -412,6 +419,9 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
   const set = (patch) => onChange({ ...value, ...patch });
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+
+  const hasVariants = value.variants?.length > 0 || value.hasVariants;
+  const totalStock = (value.variants || []).reduce((s, v) => s + (Number(v.stock) || 0), 0);
 
   const handleFilePick = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -449,15 +459,9 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
   const removeImage = (url) =>
     set({ images: (value.images || []).filter((u) => u !== url) });
 
-  const moveImage = (from, to) => {
-    const imgs = [...(value.images || [])];
-    const [moved] = imgs.splice(from, 1);
-    imgs.splice(to, 0, moved);
-    set({ images: imgs });
-  };
-
   const addVariant = () => {
     set({
+      hasVariants: true,
       variants: [
         ...(value.variants || []),
         {
@@ -476,7 +480,11 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
   };
 
   const removeVariant = (idx) => {
-    set({ variants: (value.variants || []).filter((_, i) => i !== idx) });
+    const next = (value.variants || []).filter((_, i) => i !== idx);
+    set({
+      variants: next,
+      hasVariants: next.length > 0 ? value.hasVariants : false,
+    });
   };
 
   const duplicateVariant = (idx) => {
@@ -485,29 +493,31 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
     set({ variants: [...value.variants, copy] });
   };
 
-    return (
+  return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 sm:grid sm:place-items-center sm:p-4"
+      className="fixed inset-0 z-[100] flex items-stretch justify-center bg-ink-900/60 sm:items-center sm:p-4"
       onClick={onClose}
     >
       <div
-        className="flex h-[95vh] w-full flex-col rounded-t-3xl bg-white shadow-soft sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:rounded-3xl"
+        className="flex h-full w-full flex-col bg-white sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Sticky header */}
         <div className="flex shrink-0 items-center justify-between border-b border-ink-900/5 px-4 py-3 sm:px-6 sm:py-4">
           <h2 className="font-display text-lg sm:text-xl">
             {value._id ? "Edit product" : "New product"}
           </h2>
-          <button onClick={onClose} className="p-1 text-ink-500" aria-label="Close">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-2 text-ink-500 hover:bg-cream"
+            aria-label="Close"
+          >
             ✕
           </button>
         </div>
 
-        {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            {/* ⬇️ KEEP ALL YOUR EXISTING FIELDS HERE — no changes to them ⬇️ */}
             <F label="Name" v={value.name} on={(v) => set({ name: v })} />
             <F label="Slug (optional)" v={value.slug} on={(v) => set({ slug: v })} />
             <div className="sm:col-span-2">
@@ -536,7 +546,6 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
             <F label="Brand" v={value.brand} on={(v) => set({ brand: v })} />
             <F label="Age range" v={value.ageRange} on={(v) => set({ ageRange: v })} />
 
-            {/* PRODUCT IMAGES */}
             <div className="sm:col-span-2">
               <FLabel label="Product Images">
                 <div
@@ -559,9 +568,9 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
                         <button
                           type="button"
                           onClick={() => removeImage(url)}
-                          className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-red-500 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                          className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-red-500 text-white"
                         >
-                          <X size={10} />
+                          <X size={12} />
                         </button>
                       </div>
                     ))}
@@ -570,7 +579,6 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
               </FLabel>
             </div>
 
-            {/* VARIANTS SECTION */}
             <div className="mt-4 rounded-2xl border-2 border-blush-200 bg-blush-50/30 p-4 sm:col-span-2">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -600,18 +608,18 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
                           <button
                             type="button"
                             onClick={() => duplicateVariant(idx)}
-                            className="grid h-7 w-7 place-items-center rounded-full text-ink-500 hover:bg-cream"
+                            className="grid h-8 w-8 place-items-center rounded-full text-ink-500 hover:bg-cream"
                             title="Duplicate"
                           >
-                            <Copy size={12} />
+                            <Copy size={14} />
                           </button>
                           <button
                             type="button"
                             onClick={() => removeVariant(idx)}
-                            className="grid h-7 w-7 place-items-center rounded-full text-red-500 hover:bg-red-50"
+                            className="grid h-8 w-8 place-items-center rounded-full text-red-500 hover:bg-red-50"
                             title="Delete"
                           >
-                            <Trash2 size={12} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </div>
@@ -620,34 +628,34 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
                           value={variant.name}
                           onChange={(e) => updateVariant(idx, { name: e.target.value })}
                           placeholder="Variant name (e.g. Size S · 30 pants)"
-                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2 text-sm"
+                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2.5 text-sm"
                         />
                         <input
                           value={variant.sku}
                           onChange={(e) => updateVariant(idx, { sku: e.target.value })}
                           placeholder="SKU (e.g. PAMP-S-30)"
-                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2 text-sm font-mono"
+                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2.5 text-sm font-mono"
                         />
                         <input
                           type="number" min="0"
                           value={variant.price}
                           onChange={(e) => updateVariant(idx, { price: e.target.value })}
                           placeholder="Price ₹"
-                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2 text-sm"
+                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2.5 text-sm"
                         />
                         <input
                           type="number" min="0"
                           value={variant.originalPrice}
                           onChange={(e) => updateVariant(idx, { originalPrice: e.target.value })}
                           placeholder="MRP ₹"
-                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2 text-sm"
+                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2.5 text-sm"
                         />
                         <input
                           type="number" min="0"
                           value={variant.stock}
                           onChange={(e) => updateVariant(idx, { stock: e.target.value })}
                           placeholder="Stock"
-                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2 text-sm sm:col-span-2"
+                          className="rounded-lg border border-ink-900/10 bg-cream px-3 py-2.5 text-sm sm:col-span-2"
                         />
                       </div>
                     </div>
@@ -661,7 +669,6 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
               )}
             </div>
 
-            {/* Price + Stock — only show if NO variants */}
             {!hasVariants && (
               <>
                 <F label="Price (₹)" type="number" v={value.price} on={(v) => set({ price: v })} />
@@ -695,15 +702,16 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
           </div>
         </div>
 
-        {/* Sticky footer with Save/Cancel — always visible on mobile */}
         <div className="flex shrink-0 gap-2 border-t border-ink-900/5 bg-white px-4 py-3 sm:justify-end sm:px-6 sm:py-4">
           <button
+            type="button"
             onClick={onClose}
             className="flex-1 rounded-full border border-ink-900/10 px-5 py-2.5 text-sm sm:flex-none"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={onSave}
             disabled={busy || uploading}
             className="flex-1 rounded-full bg-ink-900 px-5 py-2.5 text-sm text-white disabled:opacity-50 sm:flex-none"
@@ -716,14 +724,13 @@ function ProductForm({ value, onChange, onSave, onClose, busy, categories }) {
   );
 }
 
-function F({ label, v, on, type = "text", placeholder }) {
+function F({ label, v, on, type = "text" }) {
   return (
     <FLabel label={label}>
       <input
         type={type}
         value={v ?? ""}
         onChange={(e) => on(e.target.value)}
-        placeholder={placeholder}
         className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm focus:border-blush-400 focus:outline-none"
       />
     </FLabel>
