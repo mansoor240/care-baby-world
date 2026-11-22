@@ -16,6 +16,7 @@ import customersRouter from "./routes/customers.js";
 import { notFound, errorHandler } from "./middleware/error.js";
 
 const app = express();
+app.set("trust proxy", 1); // Trust Render's proxy (1 hop)
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "2mb" }));
