@@ -41,14 +41,16 @@ export default function Home() {
   const featuredScale = useTransform(featuredScroll.scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
 
   useEffect(() => {
-    Promise.all([
-      api.get("/home")
-  .then((r) => {
-    setFeatured(r.data.featuredProducts);
-    setBestsellers(r.data.bestSellers);
-    setCategories(r.data.categories);
-  })
-  .finally(() => setLoading(false));
+    api
+      .get("/home")
+      .then((r) => {
+        setFeatured(r.data.featuredProducts || []);
+        setBestsellers(r.data.bestSellers || []);
+        setCategories(r.data.categories || []);
+        setHomeOffer(r.data.homeOffer || null);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -108,7 +110,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-            {/* ─── BESTSELLERS (grid) ─────────────────────── */}
+      {/* ─── BESTSELLERS (grid) ─────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-8">
         <motion.div
           initial="hidden"
@@ -129,7 +131,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-          {/* ─── OFFER BANNER (admin-controlled) ─────────── */}
+      {/* ─── OFFER BANNER (admin-controlled) ─────────── */}
       {homeOffer && (
         <section className="mx-auto max-w-7xl px-4 py-8">
           <motion.div
