@@ -2,9 +2,16 @@ import { Link } from "react-router-dom";
 import { storeConfig } from "../../config/store";
 
 export default function Footer() {
+  const fullAddress = `${storeConfig.address.line1}, ${storeConfig.address.area}, ${storeConfig.address.city}, ${storeConfig.address.state} — ${storeConfig.address.pincode}`;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    fullAddress
+  )}`;
+  const phoneTel = storeConfig.phone.replace(/[^\d+]/g, "");
+
   return (
     <footer className="border-t border-ink-900/5 bg-white dark:border-white/5 dark:bg-night-900">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
+        {/* Brand + address */}
         <div>
           <Link
             to="/"
@@ -21,14 +28,20 @@ export default function Footer() {
           <p className="mt-2 text-sm text-ink-500 dark:text-night-300">
             {storeConfig.tagline}
           </p>
-          <p className="mt-4 text-xs text-ink-500 dark:text-night-400">
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-4 block text-xs text-ink-500 transition hover:text-ink-900 dark:text-night-400 dark:hover:text-night-50"
+          >
             {storeConfig.address.line1}, {storeConfig.address.area}
             <br />
             {storeConfig.address.city}, {storeConfig.address.state} —{" "}
             {storeConfig.address.pincode}
-          </p>
+          </a>
         </div>
 
+        {/* Shop */}
         <div>
           <h4 className="text-sm font-semibold text-ink-900 dark:text-night-50">
             Shop
@@ -42,6 +55,7 @@ export default function Footer() {
           </ul>
         </div>
 
+        {/* Help */}
         <div>
           <h4 className="text-sm font-semibold text-ink-900 dark:text-night-50">
             Help
@@ -57,13 +71,41 @@ export default function Footer() {
           </ul>
         </div>
 
+        {/* Contact — clickable phone, email, address */}
         <div>
           <h4 className="text-sm font-semibold text-ink-900 dark:text-night-50">
             Contact
           </h4>
           <ul className="mt-3 space-y-2 text-sm text-ink-500 dark:text-night-300">
-            <li>{storeConfig.phone}</li>
-            <li>{storeConfig.email}</li>
+            <li>
+              <a
+                href={`tel:${phoneTel}`}
+                className="hover:text-ink-900 dark:hover:text-night-50 transition"
+              >
+                {storeConfig.phone}
+              </a>
+            </li>
+            <li>
+              <a
+                href={`mailto:${storeConfig.email}`}
+                className="hover:text-ink-900 dark:hover:text-night-50 transition break-all"
+              >
+                {storeConfig.email}
+              </a>
+            </li>
+            <li>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-ink-900 dark:hover:text-night-50 transition"
+              >
+                {storeConfig.address.line1}, {storeConfig.address.area}
+                <br />
+                {storeConfig.address.city}, {storeConfig.address.state} —{" "}
+                {storeConfig.address.pincode}
+              </a>
+            </li>
             <li>{storeConfig.openingHours}</li>
           </ul>
         </div>
