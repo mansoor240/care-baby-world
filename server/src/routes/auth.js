@@ -12,6 +12,7 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: true,
   keyGenerator: (req) => {
+    // Use Cloudflare's real client IP header first, fall back to req.ip
     return req.headers["cf-connecting-ip"] || req.ip;
   },
 });
