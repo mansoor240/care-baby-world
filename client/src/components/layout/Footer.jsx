@@ -27,10 +27,10 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=Care+Baby+Store
             {storeConfig.tagline}
           </p>
           <a
-            href={mapsUrl}
+            
             target="_blank"
             rel="noreferrer"
-            className="mt-4 block text-xs text-ink-500 transition hover:text-ink-900 dark:text-night-400 dark:hover:text-night-50"
+            className="mt-4 block text-xs text-ink-500 transition  dark:text-night-400 dark:hover:text-night-50"
           >
             {storeConfig.address.line1}, {storeConfig.address.area}
             <br />
