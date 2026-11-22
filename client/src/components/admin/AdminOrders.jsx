@@ -25,13 +25,7 @@ export default function AdminOrders() {
       toast.error("Cancel this order first, then delete");
       return;
     }
-    if (
-      !confirm(
-        `DELETE order ${order.orderNumber} permanently?\n\nThis cannot be undone.`
-      )
-    )
-      return;
-
+    if (!confirm(`DELETE order ${order.orderNumber} permanently?\n\nThis cannot be undone.`)) return;
     try {
       await api.delete(`/admin/orders/${order._id}`);
       toast.success("Order deleted");
@@ -47,7 +41,8 @@ export default function AdminOrders() {
       <h1 className="font-display text-2xl">Orders</h1>
       <p className="mt-1 text-sm text-ink-500">{orders.length} orders</p>
 
-      <div className="mt-6 overflow-hidden rounded-3xl bg-white shadow-card">
+      {/* Desktop table */}
+      <div className="mt-6 hidden overflow-hidden rounded-3xl bg-white shadow-card md:block">
         <table className="w-full text-sm">
           <thead className="bg-cream text-left text-xs text-ink-500">
             <tr>
@@ -82,17 +77,11 @@ export default function AdminOrders() {
                   </select>
                 </td>
                 <td className="p-3 text-right">
-                  <button
-                    onClick={() => setSelected(o)}
-                    className="text-blush-500 text-xs hover:underline"
-                  >
+                  <button onClick={() => setSelected(o)} className="text-blush-500 text-xs hover:underline">
                     View
                   </button>
                   {o.status === "cancelled" && (
-                    <button
-                      onClick={() => deleteOrder(o)}
-                      className="ml-3 text-red-500 text-xs hover:underline"
-                    >
+                    <button onClick={() => deleteOrder(o)} className="ml-3 text-red-500 text-xs hover:underline">
                       Delete
                     </button>
                   )}
@@ -106,52 +95,111 @@ export default function AdminOrders() {
         </table>
       </div>
 
-      {selected && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4" onClick={() => setSelected(null)}>
-          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-xl">{selected.orderNumber}</h2>
-              <button onClick={() => setSelected(null)}>✕</button>
+      {/* Mobile cards */}
+      <div className="mt-6 space-y-3 md:hidden">
+        {orders.map((o) => (
+          <div key={o._id} className="rounded-2xl bg-white p-4 shadow-card">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="font-semibold">{o.orderNumber}</div>
+                <div className="text-xs text-ink-500">{formatDate(o.createdAt)}</div>
+              </div>
+              <div className="text-right text-sm font-semibold">{formatPrice(o.total)}</div>
             </div>
-
-            {selected.status === "cancelled" && (
-              <div className="mt-3 rounded-2xl bg-red-50 p-3">
-                <p className="text-xs text-red-700">
-                  ⚠️ This order is cancelled. You can delete it permanently.
-                </p>
+            <div className="mt-2 text-sm">
+              <div>{o.customer.fullName}</div>
+              <div className="text-xs text-ink-500">{o.customer.mobile}</div>
+            </div>
+            <div className="mt-3">
+              <select
+                value={o.status}
+                onChange={(e) => updateStatus(o._id, e.target.value)}
+                className="w-full rounded-full border border-ink-900/10 bg-white px-3 py-2 text-xs capitalize"
+              >
+                {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => setSelected(o)}
+                className="flex-1 rounded-full bg-blush-50 py-2 text-xs font-medium text-blush-500"
+              >
+                View details
+              </button>
+              {o.status === "cancelled" && (
                 <button
-                  onClick={() => deleteOrder(selected)}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-red-500 py-2 text-xs font-medium text-white hover:bg-red-600 transition"
+                  onClick={() => deleteOrder(o)}
+                  className="rounded-full bg-red-50 px-3 py-2 text-xs font-medium text-red-500"
                 >
-                  <Trash2 size={14} /> Delete this order permanently
+                  Delete
                 </button>
-              </div>
-            )}
-
-            <div className="mt-4 text-sm">
-              <div className="font-semibold">{selected.customer.fullName}</div>
-              <div className="text-ink-500">{selected.customer.mobile}</div>
-              <div className="text-ink-500">
-                {selected.customer.house}, {selected.customer.street}, {selected.customer.city}, {selected.customer.state} — {selected.customer.pincode}
-              </div>
+              )}
             </div>
-            <ul className="mt-4 space-y-2">
-              {selected.items.map((i) => (
-                <li key={i.productId + i.variant} className="flex gap-3 text-sm">
-                  <img src={i.image} alt="" className="h-12 w-12 rounded-xl object-cover" />
-                  <div className="flex-1">
-                    <div>{i.name}</div>
-                    <div className="text-xs text-ink-500">Qty {i.quantity}</div>
-                  </div>
-                  <div>{formatPrice(i.price * i.quantity)}</div>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4 border-t border-ink-900/10 pt-3 text-sm">
-              <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(selected.subtotal)}</span></div>
-              <div className="flex justify-between"><span>Discount</span><span>− {formatPrice(selected.discount)}</span></div>
-              <div className="flex justify-between"><span>Delivery</span><span>{selected.deliveryFee === 0 ? "Free" : formatPrice(selected.deliveryFee)}</span></div>
-              <div className="flex justify-between font-semibold"><span>Total</span><span>{formatPrice(selected.total)}</span></div>
+          </div>
+        ))}
+        {!orders.length && (
+          <div className="rounded-2xl bg-white p-8 text-center text-sm text-ink-500 shadow-card">
+            No orders yet.
+          </div>
+        )}
+      </div>
+
+      {/* Detail modal — full-screen on mobile */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 sm:grid sm:place-items-center sm:p-4"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="flex h-[95vh] w-full flex-col rounded-t-3xl bg-white sm:h-auto sm:max-h-[90vh] sm:max-w-xl sm:rounded-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-ink-900/5 px-4 py-3 sm:px-6 sm:py-4">
+              <h2 className="font-display text-lg sm:text-xl">{selected.orderNumber}</h2>
+              <button onClick={() => setSelected(null)} className="p-1 text-ink-500" aria-label="Close">✕</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+              {selected.status === "cancelled" && (
+                <div className="rounded-2xl bg-red-50 p-3">
+                  <p className="text-xs text-red-700">⚠️ This order is cancelled. You can delete it permanently.</p>
+                  <button
+                    onClick={() => deleteOrder(selected)}
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-red-500 py-2 text-xs font-medium text-white hover:bg-red-600 transition"
+                  >
+                    <Trash2 size={14} /> Delete this order permanently
+                  </button>
+                </div>
+              )}
+
+              <div className="mt-4 text-sm">
+                <div className="font-semibold">{selected.customer.fullName}</div>
+                <div className="text-ink-500">{selected.customer.mobile}</div>
+                <div className="text-ink-500">
+                  {selected.customer.house}, {selected.customer.street}, {selected.customer.city}, {selected.customer.state} — {selected.customer.pincode}
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2">
+                {selected.items.map((i) => (
+                  <li key={i.productId + (i.variantId || i.variant || "")} className="flex gap-3 text-sm">
+                    <img src={i.image} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                    <div className="flex-1">
+                      <div>{i.name}</div>
+                      <div className="text-xs text-ink-500">
+                        Qty {i.quantity}
+                        {i.variantName && ` · ${i.variantName}`}
+                      </div>
+                    </div>
+                    <div>{formatPrice(i.price * i.quantity)}</div>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 border-t border-ink-900/10 pt-3 text-sm">
+                <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(selected.subtotal)}</span></div>
+                <div className="flex justify-between"><span>Discount</span><span>− {formatPrice(selected.discount)}</span></div>
+                <div className="flex justify-between"><span>Delivery</span><span>{selected.deliveryFee === 0 ? "Free" : formatPrice(selected.deliveryFee)}</span></div>
+                <div className="flex justify-between font-semibold"><span>Total</span><span>{formatPrice(selected.total)}</span></div>
+              </div>
             </div>
           </div>
         </div>

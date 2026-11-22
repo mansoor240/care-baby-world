@@ -49,7 +49,8 @@ export default function AdminCoupons() {
         </button>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-3xl bg-white shadow-card">
+      {/* Desktop table */}
+      <div className="mt-6 hidden overflow-hidden rounded-3xl bg-white shadow-card md:block">
         <table className="w-full text-sm">
           <thead className="bg-cream text-left text-xs text-ink-500">
             <tr>
@@ -67,9 +68,7 @@ export default function AdminCoupons() {
               <tr key={c._id} className="border-t border-ink-900/5">
                 <td className="p-3 font-mono font-semibold">{c.code}</td>
                 <td className="p-3 text-xs capitalize">{c.type}</td>
-                <td className="p-3">
-                  {c.type === "percentage" ? `${c.value}%` : `₹${c.value}`}
-                </td>
+                <td className="p-3">{c.type === "percentage" ? `${c.value}%` : `₹${c.value}`}</td>
                 <td className="p-3">₹{c.minOrderAmount}</td>
                 <td className="p-3 text-xs">{formatDate(c.expiresAt)}</td>
                 <td className="p-3">{c.active ? "✅" : "—"}</td>
@@ -86,57 +85,134 @@ export default function AdminCoupons() {
         </table>
       </div>
 
-      {editing && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4" onClick={() => setEditing(null)}>
-          <div className="w-full max-w-md rounded-3xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="font-display text-xl">{editing._id ? "Edit" : "New"} coupon</h2>
-            <div className="mt-4 space-y-3">
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium">Code</span>
-                <input
-                  value={editing.code}
-                  onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase() })}
-                  className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-2.5 text-sm font-mono"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium">Type</span>
-                <select
-                  value={editing.type}
-                  onChange={(e) => setEditing({ ...editing, type: e.target.value })}
-                  className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-2.5 text-sm"
-                >
-                  <option value="percentage">Percentage</option>
-                  <option value="fixed">Fixed (₹)</option>
-                </select>
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium">Value</span>
-                <input type="number" value={editing.value}
-                  onChange={(e) => setEditing({ ...editing, value: e.target.value })}
-                  className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-2.5 text-sm" />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium">Min order amount (₹)</span>
-                <input type="number" value={editing.minOrderAmount}
-                  onChange={(e) => setEditing({ ...editing, minOrderAmount: e.target.value })}
-                  className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-2.5 text-sm" />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium">Expiry date</span>
-                <input type="date" value={editing.expiresAt}
-                  onChange={(e) => setEditing({ ...editing, expiresAt: e.target.value })}
-                  className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-2.5 text-sm" />
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={!!editing.active}
-                  onChange={(e) => setEditing({ ...editing, active: e.target.checked })} />
-                Active
-              </label>
+      {/* Mobile cards */}
+      <div className="mt-6 space-y-3 md:hidden">
+        {items.map((c) => (
+          <div key={c._id} className="rounded-2xl bg-white p-4 shadow-card">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="font-mono text-base font-semibold">{c.code}</div>
+                <div className="mt-1 text-xs text-ink-500 capitalize">{c.type}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-semibold">
+                  {c.type === "percentage" ? `${c.value}%` : `₹${c.value}`}
+                </div>
+                {c.active ? (
+                  <span className="mt-1 inline-block rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-bold text-sage-600">ACTIVE</span>
+                ) : (
+                  <span className="mt-1 inline-block rounded-full bg-ink-900/10 px-2 py-0.5 text-[10px] font-bold text-ink-500">OFF</span>
+                )}
+              </div>
             </div>
-            <div className="mt-6 flex justify-end gap-2">
-              <button onClick={() => setEditing(null)} className="rounded-full border px-5 py-2 text-sm">Cancel</button>
-              <button onClick={save} className="rounded-full bg-ink-900 px-5 py-2 text-sm text-white">Save</button>
+            <div className="mt-2 space-y-1 text-xs text-ink-500">
+              <div>Min order: ₹{c.minOrderAmount}</div>
+              <div>Expires: {formatDate(c.expiresAt)}</div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => setEditing({ ...c, expiresAt: c.expiresAt.slice(0, 10) })}
+                className="flex-1 rounded-full bg-blush-50 py-2 text-xs font-medium text-blush-500"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => remove(c._id)}
+                className="rounded-full bg-red-50 px-3 py-2 text-xs font-medium text-red-500"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+        {!items.length && (
+          <div className="rounded-2xl bg-white p-8 text-center text-sm text-ink-500 shadow-card">
+            No coupons yet.
+          </div>
+        )}
+      </div>
+
+      {/* Modal — full-screen on mobile */}
+      {editing && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 sm:grid sm:place-items-center sm:p-4"
+          onClick={() => setEditing(null)}
+        >
+          <div
+            className="flex h-[95vh] w-full flex-col rounded-t-3xl bg-white sm:h-auto sm:max-h-[90vh] sm:max-w-md sm:rounded-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-ink-900/5 px-4 py-3 sm:px-6 sm:py-4">
+              <h2 className="font-display text-lg sm:text-xl">{editing._id ? "Edit" : "New"} coupon</h2>
+              <button onClick={() => setEditing(null)} className="p-1 text-ink-500" aria-label="Close">✕</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+              <div className="space-y-3">
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium">Code</span>
+                  <input
+                    value={editing.code}
+                    onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase() })}
+                    className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm font-mono"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium">Type</span>
+                  <select
+                    value={editing.type}
+                    onChange={(e) => setEditing({ ...editing, type: e.target.value })}
+                    className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm"
+                  >
+                    <option value="percentage">Percentage</option>
+                    <option value="fixed">Fixed (₹)</option>
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium">Value</span>
+                  <input
+                    type="number"
+                    value={editing.value}
+                    onChange={(e) => setEditing({ ...editing, value: e.target.value })}
+                    className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium">Min order amount (₹)</span>
+                  <input
+                    type="number"
+                    value={editing.minOrderAmount}
+                    onChange={(e) => setEditing({ ...editing, minOrderAmount: e.target.value })}
+                    className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium">Expiry date</span>
+                  <input
+                    type="date"
+                    value={editing.expiresAt}
+                    onChange={(e) => setEditing({ ...editing, expiresAt: e.target.value })}
+                    className="w-full rounded-2xl border border-ink-900/10 bg-cream px-4 py-3 text-sm"
+                  />
+                </label>
+                <label className="flex items-center gap-2 py-1 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!editing.active}
+                    onChange={(e) => setEditing({ ...editing, active: e.target.checked })}
+                  />
+                  Active
+                </label>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 gap-2 border-t border-ink-900/5 bg-white px-4 py-3 sm:justify-end sm:px-6 sm:py-4">
+              <button onClick={() => setEditing(null)} className="flex-1 rounded-full border border-ink-900/10 px-5 py-2.5 text-sm sm:flex-none">
+                Cancel
+              </button>
+              <button onClick={save} className="flex-1 rounded-full bg-ink-900 px-5 py-2.5 text-sm text-white sm:flex-none">
+                Save
+              </button>
             </div>
           </div>
         </div>
