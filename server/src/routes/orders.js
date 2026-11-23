@@ -127,6 +127,20 @@ router.post("/", optionalCustomer, async (req, res) => {
         active: true,
       });
 
+    // ─── One-time-per-customer check ───
+    if (coupon) {
+      const alreadyUsed = await Order.findOne({
+        "customer.mobile": customer.mobile,
+        couponCode: coupon.code,
+        status: { $ne: "cancelled" }, // ignore cancelled orders
+      });
+      if (alreadyUsed) {
+        return res.status(400).json({
+          error: "You have already used this coupon. It can only be used once per customer.",
+        });
+      }
+    }
+
     const { subtotal, discount, deliveryFee, total } = calculateTotals(
       validated,
       coupon
