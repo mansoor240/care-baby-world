@@ -59,11 +59,22 @@ export default function Checkout() {
     return null;
   }
 
-  const applyCoupon = async () => {
+    const applyCoupon = async () => {
     if (!couponCode.trim()) return;
+
+    // Require mobile first so we can check one-time use
+    if (!customer.mobile || customer.mobile.length !== 10) {
+      toast.error("Please enter your 10-digit mobile number first");
+      return;
+    }
+
     setApplying(true);
     try {
-      const { data } = await api.post("/coupons/validate", { code: couponCode.trim(), subtotal });
+      const { data } = await api.post("/coupons/validate", {
+        code: couponCode.trim(),
+        subtotal,
+        mobile: customer.mobile,
+      });
       cart.setCoupon(data);
       toast.success(`Coupon applied: −${formatPrice(data.discount)}`);
     } catch (e) {
